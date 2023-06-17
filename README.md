@@ -28,20 +28,20 @@ Widget build(BuildContext context) {
       center: LatLng(51.509364, -0.128928),
       zoom: 9.2,
     ),
-    <a data-footnote-ref href="#user-content-fn-4">children</a>: [
-      TileLayer(
-        <a data-footnote-ref href="#user-content-fn-5">urlTemplate:</a> 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-        userAgentPackageName: 'com.example.app',
-      ),
-    ],
     nonRotatedChildren: [
-      <a data-footnote-ref href="#user-content-fn-6">RichAttributionWidget</a>(
+      <a data-footnote-ref href="#user-content-fn-4">RichAttributionWidget</a>(
         attributions: [
           TextSourceAttribution(
             'OpenStreetMap contributors',
-            onTap: () => <a data-footnote-ref href="#user-content-fn-7">launchUrl</a>(Uri.parse('https://openstreetmap.org/copyright')),
+            onTap: () => <a data-footnote-ref href="#user-content-fn-5">launchUrl</a>(Uri.parse('https://openstreetmap.org/copyright')),
           ),
         ],
+      ),
+    ],
+    <a data-footnote-ref href="#user-content-fn-6">children</a>: [
+      TileLayer(
+        <a data-footnote-ref href="#user-content-fn-7">urlTemplate</a>: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        userAgentPackageName: 'com.example.app',
       ),
     ],
   );
@@ -101,10 +101,10 @@ We'd love to have your contributions to add your own or others' pull requests!
 
 [^3]: Plenty of customisable options available
 
-[^4]: Choose from a variety of features to display on your map
+[^4]: Stylish attribution required? No problem!
 
-[^5]: Connect to any\* map server/provider
+[^5]: _Requires url\_launcher to be installed separately_
 
-[^6]: Stylish attribution required? No problem!
+[^6]: Choose from a variety of features to display on your map
 
-[^7]: _Requires url\_launcher to be installed separately_
+[^7]: Connect to any\* map server/provider
