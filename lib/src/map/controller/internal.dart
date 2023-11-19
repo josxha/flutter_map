@@ -277,10 +277,7 @@ class FlutterMapInternalController extends ValueNotifier<_InternalState> {
     );
 
     if (options.interactionOptions != newOptions.interactionOptions) {
-      _interactiveViewerState.updateGestures(
-        options.interactionOptions,
-        newOptions.interactionOptions,
-      );
+      _interactiveViewerState.updateGestures(newOptions.interactionOptions);
     }
 
     value = _InternalState(
