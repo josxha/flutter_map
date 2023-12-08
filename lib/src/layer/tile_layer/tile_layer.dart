@@ -612,6 +612,7 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
     );
 
     if (!_outsideZoomLimits(tileZoom)) {
+      logZoomLevel(tileZoom);
       _loadTiles(
         visibleTileRange,
         pruneAfterLoad: true,
@@ -641,6 +642,7 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
     required bool pruneAfterLoad,
   }) {
     final tileZoom = tileLoadRange.zoom;
+    logZoomLevel(tileZoom);
     tileLoadRange = tileLoadRange.expand(widget.panBuffer);
 
     // Build the queue of tiles to load. Marks all tiles with valid coordinates
@@ -715,6 +717,23 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
 
   bool _outsideZoomLimits(num zoom) =>
       zoom < widget.minZoom || zoom > widget.maxZoom;
+}
+
+int lastZoomLevel = -1;
+final sw = Stopwatch();
+
+void logZoomLevel(int zoom) {
+  if (zoom == lastZoomLevel) return;
+  sw.stop();
+  if (lastZoomLevel != -1) {
+    final ms = sw.elapsedMilliseconds;
+    if (ms < 1000) {
+      print('zoom level $lastZoomLevel has been visible for ${ms}ms');
+    }
+  }
+  lastZoomLevel = zoom;
+  sw.reset();
+  sw.start();
 }
 
 double _distanceSq(TileCoordinates coord, Point<double> center) {
