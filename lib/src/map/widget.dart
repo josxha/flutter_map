@@ -100,9 +100,6 @@ class _FlutterMapStateContainer extends State<FlutterMap>
     final widgets = ClipRect(
       child: Stack(
         children: <Widget>[
-          Positioned.fill(
-            child: ColoredBox(color: widget.options.backgroundColor),
-          ),
           ...widget.children.map(
             (child) => TranslucentPointer(
               translucent: widget.options.applyPointerTranslucencyToLayers,
@@ -116,15 +113,54 @@ class _FlutterMapStateContainer extends State<FlutterMap>
     return LayoutBuilder(
       builder: (context, constraints) {
         _updateAndEmitSizeIfConstraintsChanged(constraints);
+        final size = MediaQuery.sizeOf(context);
 
         return MapInteractiveViewer(
           controller: _mapController,
           builder: (context, options, camera) {
-            return MapInheritedModel(
-              controller: _mapController,
-              options: options,
-              camera: camera,
-              child: widgets,
+            final worldWidgetWidth = 300.0;
+            final amountWorldWidgets = (size.width / worldWidgetWidth).ceil();
+
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: ColoredBox(color: widget.options.backgroundColor),
+                ),
+                ...List.generate(
+                  amountWorldWidgets,
+                  (index) {
+                    final worldCamera = MapCamera(
+                      crs: camera.crs,
+                      center: camera.unproject(
+                        camera.project(camera.center) +
+                            Point(worldWidgetWidth * index, 0),
+                      ),
+                      zoom: camera.zoom,
+                      rotation: camera.rotation,
+                      nonRotatedSize: Point(
+                        worldWidgetWidth,
+                        size.height,
+                      ),
+                    );
+                    return MapInheritedModel(
+                      controller: _mapController,
+                      options: options,
+                      camera: worldCamera,
+                      child: Positioned(
+                        left: index * worldWidgetWidth,
+                        top: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: worldWidgetWidth,
+                          //height: worldWidgetWidth,
+                          decoration: BoxDecoration(border: Border.all()),
+                          child: widgets,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             );
           },
         );

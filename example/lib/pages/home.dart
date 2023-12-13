@@ -2,13 +2,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_example/misc/tile_providers.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_map_example/widgets/drawer/floating_menu_button.dart';
 import 'package:flutter_map_example/widgets/drawer/menu_drawer.dart';
 import 'package:flutter_map_example/widgets/first_start_dialog.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   static const String route = '/';
@@ -33,35 +32,16 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           FlutterMap(
-            options: MapOptions(
-              initialCenter: const LatLng(51.5, -0.09),
-              initialZoom: 5,
-              cameraConstraint: CameraConstraint.contain(
-                bounds: LatLngBounds(
-                  const LatLng(-90, -180),
-                  const LatLng(90, 180),
-                ),
-              ),
+            options: const MapOptions(
+              initialCenter: LatLng(0, 0),
+              initialZoom: 1,
+              minZoom: 0,
             ),
             children: [
-              openStreetMapTileLayer,
-              RichAttributionWidget(
-                popupInitialDisplayDuration: const Duration(seconds: 5),
-                animationConfig: const ScaleRAWA(),
-                showFlutterMapAttribution: false,
-                attributions: [
-                  TextSourceAttribution(
-                    'OpenStreetMap contributors',
-                    onTap: () => launchUrl(
-                      Uri.parse('https://openstreetmap.org/copyright'),
-                    ),
-                  ),
-                  const TextSourceAttribution(
-                    'This attribution is the same throughout this app, except '
-                    'where otherwise specified',
-                    prependCopyright: false,
-                  ),
-                ],
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                tileProvider: CancellableNetworkTileProvider(),
               ),
             ],
           ),
