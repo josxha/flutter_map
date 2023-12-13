@@ -457,9 +457,8 @@ class FlutterMapInternalController extends ValueNotifier<_InternalState> {
   }
 
   void _emitMapEvent(MapEvent event) {
-    if (event.source == MapEventSource.mapController && event is MapEventMove) {
-      _interactiveViewerState.interruptAnimatedMovement(event);
-    }
+    if (event.source == MapEventSource.mapController &&
+        event is MapEventMove) {}
 
     options.onMapEvent?.call(event);
 
