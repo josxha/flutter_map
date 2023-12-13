@@ -11,8 +11,6 @@ typedef InteractiveViewerBuilder = Widget Function(
   MapCamera camera,
 );
 
-/// Applies interactions (gestures/scroll/taps etc) to the current [MapCamera]
-/// via the internal [controller].
 class FlutterMapInteractiveViewer extends StatefulWidget {
   final InteractiveViewerBuilder builder;
   final FlutterMapInternalController controller;
