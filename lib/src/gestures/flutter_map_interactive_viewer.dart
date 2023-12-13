@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/src/gestures/map_events.dart';
 import 'package:flutter_map/src/map/camera/camera.dart';
@@ -52,10 +50,7 @@ class FlutterMapInteractiveViewerState
 
   void onMapStateChange() => setState(() {});
 
-  void updateGestures(
-    InteractionOptions oldOptions,
-    InteractionOptions newOptions,
-  ) {
+  void updateGestures(InteractionOptions options) {
     widget.controller.rotateEnded(MapEventSource.interactiveFlagsChanged);
   }
 
@@ -66,16 +61,5 @@ class FlutterMapInteractiveViewerState
       widget.controller.options,
       widget.controller.camera,
     );
-  }
-
-  /// Thanks to https://stackoverflow.com/questions/48916517/javascript-click-and-drag-to-rotate
-  double getCursorRotationDegrees(Offset offset) {
-    const correctionTerm = 180; // North = cursor
-
-    final size = MediaQuery.sizeOf(context);
-    return (-math.atan2(
-                offset.dx - size.width / 2, offset.dy - size.height / 2) *
-            (180 / math.pi)) +
-        correctionTerm;
   }
 }
