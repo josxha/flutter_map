@@ -1,8 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_map/src/gestures/interactive_flag.dart';
 import 'package:flutter_map/src/gestures/map_events.dart';
 import 'package:flutter_map/src/map/camera/camera.dart';
 import 'package:flutter_map/src/map/controller/internal.dart';
@@ -34,14 +32,6 @@ class FlutterMapInteractiveViewer extends StatefulWidget {
 
 class FlutterMapInteractiveViewerState
     extends State<FlutterMapInteractiveViewer> with TickerProviderStateMixin {
-  late Map<Type, GestureRecognizerFactory> _gestures;
-
-  MapCamera get _camera => widget.controller.camera;
-
-  MapOptions get _options => widget.controller.options;
-
-  InteractionOptions get _interactionOptions => _options.interactionOptions;
-
   @override
   void initState() {
     super.initState();
@@ -51,11 +41,6 @@ class FlutterMapInteractiveViewerState
 
   @override
   void didChangeDependencies() {
-    // _createGestures uses a MediaQuery to determine gesture settings. This
-    // will update those gesture settings if they change.
-    _gestures = _createGestures(
-      dragEnabled: InteractiveFlag.hasDrag(_interactionOptions.flags),
-    );
     super.didChangeDependencies();
   }
 
@@ -71,46 +56,7 @@ class FlutterMapInteractiveViewerState
     InteractionOptions oldOptions,
     InteractionOptions newOptions,
   ) {
-    final newHasDrag = InteractiveFlag.hasDrag(newOptions.flags);
-    if (newHasDrag != InteractiveFlag.hasDrag(oldOptions.flags)) {
-      _gestures = _createGestures(dragEnabled: newHasDrag);
-    }
-
     widget.controller.rotateEnded(MapEventSource.interactiveFlagsChanged);
-  }
-
-  Map<Type, GestureRecognizerFactory> _createGestures({
-    required bool dragEnabled,
-  }) {
-    final gestureSettings = MediaQuery.gestureSettingsOf(context);
-    return <Type, GestureRecognizerFactory>{
-      TapGestureRecognizer:
-          GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(debugOwner: this),
-        (recognizer) {},
-      ),
-      LongPressGestureRecognizer:
-          GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this),
-        (recognizer) {},
-      ),
-      if (dragEnabled)
-        VerticalDragGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-          () => VerticalDragGestureRecognizer(debugOwner: this),
-          (recognizer) {},
-        ),
-      if (dragEnabled)
-        HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                HorizontalDragGestureRecognizer>(
-            () => HorizontalDragGestureRecognizer(debugOwner: this),
-            (recognizer) {}),
-      ScaleGestureRecognizer:
-          GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-        () => ScaleGestureRecognizer(debugOwner: this),
-        (recognizer) {},
-      ),
-    };
   }
 
   @override
