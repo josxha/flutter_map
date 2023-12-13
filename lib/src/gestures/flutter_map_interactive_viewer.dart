@@ -30,6 +30,7 @@ class FlutterMapInteractiveViewerState
   @override
   void initState() {
     super.initState();
+    widget.controller.interactiveViewerState = this;
     widget.controller.addListener(onMapStateChange);
   }
 
