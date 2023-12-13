@@ -36,11 +36,6 @@ class FlutterMapInteractiveViewerState
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.controller.removeListener(onMapStateChange);
     super.dispose();
