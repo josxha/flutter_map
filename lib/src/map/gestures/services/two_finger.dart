@@ -20,27 +20,25 @@ class TwoFingerGesturesService extends BaseGestureService {
 
   /// Getter as shortcut to check if [EnabledGestures.twoFingerMove]
   /// is enabled.
-  bool get _moveEnabled =>
-      _options.interactionOptions.enabledGestures.twoFingerMove;
+  bool get _moveEnabled => _options.interactionOptions.twoFingerMove.enabled;
 
   /// Getter as shortcut to check if [EnabledGestures.twoFingerRotate]
   /// is enabled.
   bool get _rotateEnabled =>
-      _options.interactionOptions.enabledGestures.twoFingerRotate;
+      _options.interactionOptions.twoFingerRotate.enabled;
 
   /// Getter as shortcut to check if [EnabledGestures.twoFingerZoom]
   /// is enabled.
-  bool get _zoomEnabled =>
-      _options.interactionOptions.enabledGestures.twoFingerZoom;
+  bool get _zoomEnabled => _options.interactionOptions.twoFingerZoom.enabled;
 
   double get _rotateThreshold =>
-      _options.interactionOptions.twoFingerRotateThreshold;
+      _options.interactionOptions.twoFingerRotate.threshold;
 
   double get _moveThreshold =>
-      _options.interactionOptions.twoFingerMoveThreshold;
+      _options.interactionOptions.twoFingerMove.threshold;
 
   double get _zoomThreshold =>
-      _options.interactionOptions.twoFingerZoomThreshold;
+      _options.interactionOptions.twoFingerZoom.threshold;
 
   TwoFingerGesturesService({required super.controller});
 

@@ -243,7 +243,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
     if (newFlags.keyTriggerDragRotate) {
       _keyTriggerDragRotate = KeyTriggerDragRotateGestureService(
         controller: widget.controller,
-        keys: _options.interactionOptions.keyTriggerDragRotateKeys,
+        keys: _options.interactionOptions.keyTriggerDragRotate.triggerKeys,
       );
     } else {
       _keyTriggerDragRotate = null;
