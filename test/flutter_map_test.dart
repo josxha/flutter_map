@@ -217,9 +217,9 @@ class _TestRebuildsAppState extends State<TestRebuildsApp> {
   Crs _crs = const Epsg3857();
 
   /// double tap gestures delay the tap gestures, disable them here
-  EnabledGestures _interactiveFlags = const EnabledGestures.all(
-    doubleTapZoomIn: false,
-    doubleTapDragZoom: false,
+  InteractionOptions _interactiveOptions = const InteractionOptions.all(
+    doubleTapZoomIn: DoubleTapZoomInGesture.disabled(),
+    doubleTapDragZoom: DoubleTapDragZoomGesture.disabled(),
   );
 
   @override
@@ -236,9 +236,7 @@ class _TestRebuildsAppState extends State<TestRebuildsApp> {
           mapController: _mapController,
           options: MapOptions(
             crs: _crs,
-            interactionOptions: InteractionOptions(
-              enabledGestures: _interactiveFlags,
-            ),
+            interactionOptions: _interactiveOptions,
           ),
           children: [
             widget.child,
@@ -247,8 +245,10 @@ class _TestRebuildsAppState extends State<TestRebuildsApp> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      _interactiveFlags = _interactiveFlags.copyWith(
-                        drag: !_interactiveFlags.drag,
+                      _interactiveOptions = _interactiveOptions.copyWith(
+                        drag: DragGesture(
+                          enabled: !_interactiveOptions.drag.enabled,
+                        ),
                       );
                     });
                   },

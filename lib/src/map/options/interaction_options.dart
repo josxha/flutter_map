@@ -60,6 +60,32 @@ final class InteractionOptions {
     this.keyTriggerDragRotate = const KeyTriggerDragRotateGesture.disabled(),
   });
 
+  InteractionOptions copyWith({
+    DragGesture? drag,
+    FlingAnimationGesture? flingAnimation,
+    TwoFingerMoveGesture? twoFingerMove,
+    TwoFingerZoomGesture? twoFingerZoom,
+    TwoFingerRotateGesture? twoFingerRotate,
+    DoubleTapZoomInGesture? doubleTapZoomIn,
+    DoubleTapDragZoomGesture? doubleTapDragZoom,
+    ScrollWheelZoomGesture? scrollWheelZoom,
+    KeyTriggerDragRotateGesture? keyTriggerDragRotate,
+  }) =>
+      InteractionOptions.all(
+        drag: drag ?? this.drag,
+        flingAnimation: flingAnimation ?? this.flingAnimation,
+        twoFingerMove: twoFingerMove ?? this.twoFingerMove,
+        twoFingerZoom: twoFingerZoom ?? this.twoFingerZoom,
+        twoFingerRotate: twoFingerRotate ?? this.twoFingerRotate,
+        doubleTapZoomIn: doubleTapZoomIn ?? this.doubleTapZoomIn,
+        doubleTapDragZoom: doubleTapDragZoom ?? this.doubleTapDragZoom,
+        scrollWheelZoom: scrollWheelZoom ?? this.scrollWheelZoom,
+        keyTriggerDragRotate: keyTriggerDragRotate ?? this.keyTriggerDragRotate,
+      );
+
+  bool get hasMultiFinger =>
+      twoFingerZoom.enabled || twoFingerMove.enabled || twoFingerRotate.enabled;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

@@ -70,7 +70,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
           TertiaryLongPressGestureService(controller: widget.controller);
     }
     // gestures that change the map camera
-    updateGestures(null, _interactionOptions.enabledGestures);
+    updateGestures(null, _interactionOptions);
   }
 
   /// Called when the widgets gets disposed, used to clean up Stream listeners
@@ -213,34 +213,37 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
   }
 
   /// Used by the internal map controller to update interaction gestures
-  void updateGestures(EnabledGestures? oldFlags, EnabledGestures newFlags) {
-    if (oldFlags == newFlags) return;
-    if (newFlags.hasMultiFinger()) {
+  void updateGestures(
+    InteractionOptions? oldOptions,
+    InteractionOptions newOptions,
+  ) {
+    if (oldOptions == newOptions) return;
+    if (newOptions.hasMultiFinger) {
       _twoFingerInput = TwoFingerGesturesService(controller: widget.controller);
     } else {
       _twoFingerInput = null;
     }
 
-    if (newFlags.drag) {
+    if (newOptions.drag.enabled) {
       _drag = DragGestureService(controller: widget.controller);
     } else {
       _drag = null;
     }
 
-    if (newFlags.doubleTapZoomIn) {
+    if (newOptions.doubleTapZoomIn.enabled) {
       _doubleTap = DoubleTapGestureService(controller: widget.controller);
     } else {
       _doubleTap = null;
     }
 
-    if (newFlags.scrollWheelZoom) {
+    if (newOptions.scrollWheelZoom.enabled) {
       _scrollWheelZoom =
           ScrollWheelZoomGestureService(controller: widget.controller);
     } else {
       _scrollWheelZoom = null;
     }
 
-    if (newFlags.keyTriggerDragRotate) {
+    if (newOptions.keyTriggerDragRotate.enabled) {
       _keyTriggerDragRotate = KeyTriggerDragRotateGestureService(
         controller: widget.controller,
         keys: _options.interactionOptions.keyTriggerDragRotate.triggerKeys,
@@ -249,7 +252,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
       _keyTriggerDragRotate = null;
     }
 
-    if (newFlags.doubleTapDragZoom) {
+    if (newOptions.doubleTapDragZoom.enabled) {
       _doubleTapDragZoom =
           DoubleTapDragZoomGestureService(controller: widget.controller);
     } else {

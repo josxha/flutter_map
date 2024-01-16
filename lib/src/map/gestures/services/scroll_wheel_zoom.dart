@@ -6,7 +6,7 @@ class ScrollWheelZoomGestureService extends BaseGestureService {
 
   /// Shortcut for the zoom velocity of the scroll wheel
   double get _scrollWheelVelocity =>
-      _options.interactionOptions.scrollWheelVelocity;
+      _options.interactionOptions.scrollWheelZoom.velocity;
 
   /// Handles mouse scroll events, called by the [Listener] of
   /// the [MapInteractiveViewer].

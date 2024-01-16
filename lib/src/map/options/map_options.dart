@@ -135,7 +135,7 @@ class MapOptions {
     this.initialRotation = 0.0,
     this.initialCameraFit,
     this.cameraConstraint = const CameraConstraint.unconstrained(),
-    this.interactionOptions = const InteractionOptions(),
+    this.interactionOptions = const InteractionOptions.all(),
     this.minZoom,
     this.maxZoom,
     this.backgroundColor = const Color(0xFFE0E0E0),
