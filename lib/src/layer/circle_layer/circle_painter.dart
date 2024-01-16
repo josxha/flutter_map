@@ -1,57 +1,67 @@
-import 'dart:ui';
+part of 'circle_layer.dart';
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_map/src/layer/general/mobile_layer_transformer.dart';
-import 'package:flutter_map/src/map/camera/camera.dart';
-import 'package:latlong2/latlong.dart' hide Path;
-
-/// Immutable marker options for circle markers
 @immutable
-class CircleMarker {
-  final Key? key;
-  final LatLng point;
-  final double radius;
-  final Color color;
-  final double borderStrokeWidth;
-  final Color borderColor;
-  final bool useRadiusInMeter;
+class CirclePainter<R extends Object> extends CustomPainter {
+  final List<CircleMarker<R>> circles;
+  final MapCamera camera;
+  final LayerHitNotifier<R>? hitNotifier;
+  final double minimumHitBox;
 
-  const CircleMarker({
-    required this.point,
-    required this.radius,
-    this.key,
-    this.useRadiusInMeter = false,
-    this.color = const Color(0xFF00FF00),
-    this.borderStrokeWidth = 0.0,
-    this.borderColor = const Color(0xFFFFFF00),
+  final _hits = <R>[]; // Avoids repetitive memory reallocation
+
+  CirclePainter({
+    required this.circles,
+    required this.camera,
+    required this.hitNotifier,
+    required this.minimumHitBox,
   });
-}
-
-@immutable
-class CircleLayer extends StatelessWidget {
-  final List<CircleMarker> circles;
-
-  const CircleLayer({super.key, required this.circles});
 
   @override
-  Widget build(BuildContext context) {
-    final map = MapCamera.of(context);
-    return MobileLayerTransformer(
-      child: CustomPaint(
-        painter: CirclePainter(circles, map),
-        size: Size(map.size.x, map.size.y),
-        isComplex: true,
-      ),
+  bool? hitTest(Offset position) {
+    if (hitNotifier == null) return null;
+
+    _hits.clear();
+
+    final origin =
+        camera.project(camera.center).toOffset() - camera.size.toOffset() / 2;
+
+    for (final circle in circles.reversed) {
+      if (circle.hitValue == null) continue;
+
+      // TODO: For efficiency we'd ideally filter by bounding box here. However
+      // we'd need to compute an extended bounding box that accounts account for
+      // the stroke width.
+      // if (!p.boundingBox.contains(touch)) {
+      //   continue;
+      // }
+
+      final offset = getOffset(origin, circle.point);
+      final hittableDistance = math.max(
+        circle.borderStrokeWidth / 2 + circle.borderStrokeWidth / 2,
+        minimumHitBox,
+      );
+
+      final dx = position.dx - offset.dx;
+      final dy = position.dy - offset.dy;
+      final distance = dx * dx + dy * dy;
+
+      if (distance < hittableDistance) {
+        _hits.add(circle.hitValue!);
+        break;
+      }
+    }
+
+    if (_hits.isEmpty) {
+      hitNotifier!.value = null;
+      return false;
+    }
+
+    hitNotifier!.value = LayerHitResult(
+      hitValues: _hits,
+      point: camera.pointToLatLng(math.Point(position.dx, position.dy)),
     );
+    return true;
   }
-}
-
-@immutable
-class CirclePainter extends CustomPainter {
-  final List<CircleMarker> circles;
-  final MapCamera map;
-
-  const CirclePainter(this.circles, this.map);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -64,11 +74,11 @@ class CirclePainter extends CustomPainter {
     final pointsFilledBorder = <Color, Map<double, List<Offset>>>{};
     final pointsBorder = <Color, Map<double, Map<double, List<Offset>>>>{};
     for (final circle in circles) {
-      final offset = map.getOffsetFromOrigin(circle.point);
+      final offset = camera.getOffsetFromOrigin(circle.point);
       double radius = circle.radius;
       if (circle.useRadiusInMeter) {
         final r = distance.offset(circle.point, circle.radius, 180);
-        final delta = offset - map.getOffsetFromOrigin(r);
+        final delta = offset - camera.getOffsetFromOrigin(r);
         radius = delta.distance;
       }
       points[circle.color] ??= {};
@@ -82,7 +92,7 @@ class CirclePainter extends CustomPainter {
           double radiusBorder = circle.radius + circle.borderStrokeWidth;
           if (circle.useRadiusInMeter) {
             final rBorder = distance.offset(circle.point, radiusBorder, 180);
-            final deltaBorder = offset - map.getOffsetFromOrigin(rBorder);
+            final deltaBorder = offset - camera.getOffsetFromOrigin(rBorder);
             radiusBorder = deltaBorder.distance;
           }
           pointsFilledBorder[circle.borderColor] ??= {};
@@ -92,7 +102,7 @@ class CirclePainter extends CustomPainter {
           double realRadius = circle.radius;
           if (circle.useRadiusInMeter) {
             final rBorder = distance.offset(circle.point, realRadius, 180);
-            final deltaBorder = offset - map.getOffsetFromOrigin(rBorder);
+            final deltaBorder = offset - camera.getOffsetFromOrigin(rBorder);
             realRadius = deltaBorder.distance;
           }
           pointsBorder[circle.borderColor] ??= {};
@@ -158,5 +168,11 @@ class CirclePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CirclePainter oldDelegate) =>
-      circles != oldDelegate.circles || map != oldDelegate.map;
+      circles != oldDelegate.circles || camera != oldDelegate.camera;
+
+  Offset getOffset(Offset origin, LatLng point) {
+    // Critically create as little garbage as possible. This is called on every frame.
+    final projected = camera.project(point);
+    return Offset(projected.x - origin.dx, projected.y - origin.dy);
+  }
 }

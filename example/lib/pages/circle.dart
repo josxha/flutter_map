@@ -1,48 +1,165 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_example/misc/tile_providers.dart';
 import 'package:flutter_map_example/widgets/drawer/menu_drawer.dart';
 import 'package:latlong2/latlong.dart';
 
-class CirclePage extends StatelessWidget {
+class CirclePage extends StatefulWidget {
   static const String route = '/circle';
 
   const CirclePage({super.key});
 
   @override
+  State<CirclePage> createState() => _CirclePageState();
+}
+
+class _CirclePageState extends State<CirclePage> {
+  final _circlesRaw = <CircleMarker<String>>[
+    CircleMarker(
+      point: const LatLng(51.5, -0.09),
+      color: Colors.blue.withOpacity(0.7),
+      borderColor: Colors.black,
+      borderStrokeWidth: 2,
+      useRadiusInMeter: true,
+      radius: 2000,
+      // 2000 meters
+      hitValue: '2000 meters',
+    ),
+    CircleMarker(
+      point: const LatLng(51.4937, -0.6638),
+      // Dorney Lake is ~2km long
+      color: Colors.green.withOpacity(0.9),
+      borderColor: Colors.black,
+      borderStrokeWidth: 2,
+      useRadiusInMeter: true,
+      radius: 1000,
+      // 1000 meters
+      hitValue: 'Dorney Lake',
+    ),
+  ];
+  late final _circles =
+      Map.fromEntries(_circlesRaw.map((e) => MapEntry(e.hitValue, e)));
+  final LayerHitNotifier<String> _hitNotifier = ValueNotifier(null);
+  List<String>? _prevHitValues;
+  List<CircleMarker<String>>? _hoverCircles;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Circle')),
-      drawer: const MenuDrawer(route),
+      drawer: const MenuDrawer(CirclePage.route),
       body: FlutterMap(
         options: const MapOptions(
           initialCenter: LatLng(51.5, -0.09),
-          initialZoom: 11,
+          initialZoom: 9,
         ),
         children: [
           openStreetMapTileLayer,
-          CircleLayer(
-            circles: [
-              CircleMarker(
-                point: const LatLng(51.5, -0.09),
-                color: Colors.blue.withOpacity(0.7),
-                borderColor: Colors.black,
-                borderStrokeWidth: 2,
-                useRadiusInMeter: true,
-                radius: 2000, // 2000 meters
+          MouseRegion(
+            hitTestBehavior: HitTestBehavior.deferToChild,
+            cursor: SystemMouseCursors.click,
+            onHover: (_) {
+              final hitValues = _hitNotifier.value?.hitValues.toList();
+              if (hitValues == null) return;
+
+              if (listEquals(hitValues, _prevHitValues)) return;
+              _prevHitValues = hitValues;
+
+              final hoverCircles = hitValues.map((v) {
+                final original = _circles[v]!;
+
+                return CircleMarker<String>(
+                  point: original.point,
+                  radius: original.radius,
+                  useRadiusInMeter: original.useRadiusInMeter,
+                  color: Colors.transparent,
+                  borderStrokeWidth: 15,
+                  borderColor: Colors.green,
+                );
+              }).toList();
+              setState(() => _hoverCircles = hoverCircles);
+            },
+            onExit: (_) {
+              _prevHitValues = null;
+              setState(() => _hoverCircles = null);
+            },
+            child: GestureDetector(
+              onTap: () => _openTouchedCircleModal(
+                'Tapped',
+                _hitNotifier.value!.hitValues,
+                _hitNotifier.value!.point,
               ),
-              CircleMarker(
-                point: const LatLng(51.4937, -0.6638),
-                // Dorney Lake is ~2km long
-                color: Colors.green.withOpacity(0.9),
-                borderColor: Colors.black,
-                borderStrokeWidth: 2,
-                useRadiusInMeter: true,
-                radius: 1000, // 1000 meters
+              onLongPress: () => _openTouchedCircleModal(
+                'Long pressed',
+                _hitNotifier.value!.hitValues,
+                _hitNotifier.value!.point,
               ),
-            ],
+              onSecondaryTap: () => _openTouchedCircleModal(
+                'Secondary tapped',
+                _hitNotifier.value!.hitValues,
+                _hitNotifier.value!.point,
+              ),
+              child: CircleLayer(
+                hitNotifier: _hitNotifier,
+                circles: [..._circlesRaw, ...?_hoverCircles],
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _openTouchedCircleModal(
+    String eventType,
+    List<String> tappedCircle,
+    LatLng coords,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Tapped Polyline(s)',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '$eventType at point: (${coords.latitude.toStringAsFixed(6)}, ${coords.longitude.toStringAsFixed(6)})',
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: index == 0
+                        ? const Icon(Icons.vertical_align_top)
+                        : index == tappedCircle.length - 1
+                            ? const Icon(Icons.vertical_align_bottom)
+                            : const SizedBox.shrink(),
+                    title: Text(tappedCircle[index]),
+                    dense: true,
+                  );
+                },
+                itemCount: tappedCircle.length,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
