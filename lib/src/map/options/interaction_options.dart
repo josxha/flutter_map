@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
-/// Set interation options for input gestures.
+/// Set interaction options for input gestures.
 /// Most commonly used is [InteractionOptions.enabledGestures].
 @immutable
 final class InteractionOptions {
@@ -36,29 +36,85 @@ final class InteractionOptions {
   /// or finger.
   final KeyTriggerDragRotateGesture keyTriggerDragRotate;
 
-  const InteractionOptions.all({
-    this.drag = const DragGesture(),
-    this.flingAnimation = const FlingAnimationGesture(),
-    this.twoFingerMove = const TwoFingerMoveGesture(),
-    this.twoFingerZoom = const TwoFingerZoomGesture(),
-    this.twoFingerRotate = const TwoFingerRotateGesture(),
-    this.doubleTapZoomIn = const DoubleTapZoomInGesture(),
-    this.doubleTapDragZoom = const DoubleTapDragZoomGesture(),
-    this.scrollWheelZoom = const ScrollWheelZoomGesture(),
-    this.keyTriggerDragRotate = const KeyTriggerDragRotateGesture(),
+  const InteractionOptions._({
+    required this.drag,
+    required this.flingAnimation,
+    required this.twoFingerMove,
+    required this.twoFingerZoom,
+    required this.twoFingerRotate,
+    required this.doubleTapZoomIn,
+    required this.doubleTapDragZoom,
+    required this.scrollWheelZoom,
+    required this.keyTriggerDragRotate,
   });
 
-  const InteractionOptions.none({
-    this.drag = const DragGesture.disabled(),
-    this.flingAnimation = const FlingAnimationGesture.disabled(),
-    this.twoFingerMove = const TwoFingerMoveGesture.disabled(),
-    this.twoFingerZoom = const TwoFingerZoomGesture.disabled(),
-    this.twoFingerRotate = const TwoFingerRotateGesture.disabled(),
-    this.doubleTapZoomIn = const DoubleTapZoomInGesture.disabled(),
-    this.doubleTapDragZoom = const DoubleTapDragZoomGesture.disabled(),
-    this.scrollWheelZoom = const ScrollWheelZoomGesture.disabled(),
-    this.keyTriggerDragRotate = const KeyTriggerDragRotateGesture.disabled(),
-  });
+  factory InteractionOptions.all({
+    ZoomGestureGroup zoomGroup = const ZoomGestureGroup.enabled(),
+    PanGestureGroup panGroup = const PanGestureGroup.enabled(),
+    RotateGestureGroup rotateGroup = const RotateGestureGroup.enabled(),
+    DragGesture? drag,
+    FlingAnimationGesture? flingAnimation,
+    TwoFingerMoveGesture? twoFingerMove,
+    TwoFingerZoomGesture? twoFingerZoom,
+    TwoFingerRotateGesture? twoFingerRotate,
+    DoubleTapZoomInGesture? doubleTapZoomIn,
+    DoubleTapDragZoomGesture? doubleTapDragZoom,
+    ScrollWheelZoomGesture? scrollWheelZoom,
+    KeyTriggerDragRotateGesture? keyTriggerDragRotate,
+  }) =>
+      InteractionOptions._(
+        drag: drag ?? DragGesture(enabled: zoomGroup.enabled),
+        flingAnimation:
+            flingAnimation ?? FlingAnimationGesture(enabled: panGroup.enabled),
+        twoFingerMove:
+            twoFingerMove ?? TwoFingerMoveGesture(enabled: panGroup.enabled),
+        twoFingerZoom:
+            twoFingerZoom ?? TwoFingerZoomGesture(enabled: zoomGroup.enabled),
+        twoFingerRotate: twoFingerRotate ??
+            TwoFingerRotateGesture(enabled: rotateGroup.enabled),
+        doubleTapZoomIn: doubleTapZoomIn ??
+            DoubleTapZoomInGesture(enabled: zoomGroup.enabled),
+        doubleTapDragZoom: doubleTapDragZoom ??
+            DoubleTapDragZoomGesture(enabled: panGroup.enabled),
+        scrollWheelZoom: scrollWheelZoom ??
+            ScrollWheelZoomGesture(enabled: zoomGroup.enabled),
+        keyTriggerDragRotate: keyTriggerDragRotate ??
+            KeyTriggerDragRotateGesture(enabled: panGroup.enabled),
+      );
+
+  factory InteractionOptions.none({
+    ZoomGestureGroup zoomGroup = const ZoomGestureGroup.disabled(),
+    PanGestureGroup panGroup = const PanGestureGroup.disabled(),
+    RotateGestureGroup rotateGroup = const RotateGestureGroup.disabled(),
+    DragGesture? drag,
+    FlingAnimationGesture? flingAnimation,
+    TwoFingerMoveGesture? twoFingerMove,
+    TwoFingerZoomGesture? twoFingerZoom,
+    TwoFingerRotateGesture? twoFingerRotate,
+    DoubleTapZoomInGesture? doubleTapZoomIn,
+    DoubleTapDragZoomGesture? doubleTapDragZoom,
+    ScrollWheelZoomGesture? scrollWheelZoom,
+    KeyTriggerDragRotateGesture? keyTriggerDragRotate,
+  }) =>
+      InteractionOptions._(
+        drag: drag ?? DragGesture(enabled: zoomGroup.enabled),
+        flingAnimation:
+            flingAnimation ?? FlingAnimationGesture(enabled: panGroup.enabled),
+        twoFingerMove:
+            twoFingerMove ?? TwoFingerMoveGesture(enabled: panGroup.enabled),
+        twoFingerZoom:
+            twoFingerZoom ?? TwoFingerZoomGesture(enabled: zoomGroup.enabled),
+        twoFingerRotate: twoFingerRotate ??
+            TwoFingerRotateGesture(enabled: rotateGroup.enabled),
+        doubleTapZoomIn: doubleTapZoomIn ??
+            DoubleTapZoomInGesture(enabled: zoomGroup.enabled),
+        doubleTapDragZoom: doubleTapDragZoom ??
+            DoubleTapDragZoomGesture(enabled: panGroup.enabled),
+        scrollWheelZoom: scrollWheelZoom ??
+            ScrollWheelZoomGesture(enabled: zoomGroup.enabled),
+        keyTriggerDragRotate: keyTriggerDragRotate ??
+            KeyTriggerDragRotateGesture(enabled: panGroup.enabled),
+      );
 
   InteractionOptions copyWith({
     DragGesture? drag,
@@ -126,6 +182,24 @@ abstract class _BaseGesture {
 
   @override
   int get hashCode => enabled.hashCode;
+}
+
+class ZoomGestureGroup extends _BaseGesture {
+  const ZoomGestureGroup.enabled() : super(enabled: true);
+
+  const ZoomGestureGroup.disabled() : super(enabled: false);
+}
+
+class PanGestureGroup extends _BaseGesture {
+  const PanGestureGroup.enabled() : super(enabled: true);
+
+  const PanGestureGroup.disabled() : super(enabled: false);
+}
+
+class RotateGestureGroup extends _BaseGesture {
+  const RotateGestureGroup.enabled() : super(enabled: true);
+
+  const RotateGestureGroup.disabled() : super(enabled: false);
 }
 
 class FlingAnimationGesture extends _BaseGesture {
