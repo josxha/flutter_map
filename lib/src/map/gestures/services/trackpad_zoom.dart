@@ -2,41 +2,32 @@ part of 'base_services.dart';
 
 /// Service to handle the trackpad (aka. touchpad) zoom gesture to zoom
 /// the map in or out.
+///
+/// Trackpad gestures on most platforms since flutter 3.3 use
+/// these onPointerPanZoom* callbacks.
+/// See https://docs.flutter.dev/release/breaking-changes/trackpad-gestures
 class TrackpadZoomGestureService extends _BaseGestureService {
+  double _lastScale = 1;
+
   TrackpadZoomGestureService({required super.controller});
 
-  /// Trackpad gestures on most platforms since flutter 3.3 use
-  /// these onPointerPanZoom* callbacks.
-  /// See https://docs.flutter.dev/release/breaking-changes/trackpad-gestures
-  void submit(PointerPanZoomUpdateEvent details) {
-    print('submit: ${details.scale}');
-    if (details.scale == 1) return;
-    _zoomMap(details.scale);
+  double get _velocity => _options.interactionOptions.trackpadZoomVelocity;
+
+  void start(PointerPanZoomStartEvent details) {
+    _lastScale = 1;
   }
 
-  /// Trackpad pinch gesture, in case the pointerPanZoom event
-  /// callbacks can't be used and trackpad scrolling must still use
-  /// this old PointerScrollSignal system.
-  //
-  /// This is the case if not enough data is
-  /// provided to the Flutter engine by platform APIs:
-  /// - On **Windows**, where trackpad gesture support is dependent on
-  /// the trackpad’s driver,
-  /// - On **Web**, where not enough data is provided by browser APIs.
-  //
-  /// https://docs.flutter.dev/release/breaking-changes/trackpad-gestures#description-of-change
-  void submitFallback(PointerScaleEvent details) {
-    print('submitFallback: ${details.scale}');
-    if (details.scale == 1) return;
-    _zoomMap(details.scale);
-  }
+  void update(PointerPanZoomUpdateEvent details) {
+    if (details.scale == _lastScale) return;
+    final scaleFactor = (details.scale - _lastScale) * _velocity + 1;
+    print(scaleFactor);
 
-  void _zoomMap(double scale) {
-    final tmpZoom = _camera.zoom + (math.log(scale) / math.ln2) * 0.05;
+    final tmpZoom = _camera.zoom * scaleFactor;
     final newZoom = _camera.clampZoom(tmpZoom);
 
     // TODO: calculate new center
 
+    _lastScale = details.scale;
     controller.moveRaw(
       _camera.center,
       newZoom,
@@ -44,4 +35,6 @@ class TrackpadZoomGestureService extends _BaseGestureService {
       source: MapEventSource.trackpad,
     );
   }
+
+  void end(PointerPanZoomEndEvent details) {}
 }

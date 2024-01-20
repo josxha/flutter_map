@@ -32,6 +32,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
   ScrollWheelZoomGestureService? _scrollWheelZoom;
   TwoFingerGesturesService? _twoFingerInput;
   TrackpadZoomGestureService? _trackpadZoom;
+  TrackpadLegacyZoomGestureService? _trackpadLegacyZoom;
   DragGestureService? _drag;
   DoubleTapDragZoomGestureService? _doubleTapDragZoom;
   KeyTriggerDragRotateGestureService? _keyTriggerDragRotate;
@@ -147,14 +148,16 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
             // - On **Web**, where not enough data is provided by browser APIs.
             //
             // https://docs.flutter.dev/release/breaking-changes/trackpad-gestures#description-of-change
-            _trackpadZoom?.submitFallback(event);
+            _trackpadLegacyZoom?.submit(event);
             break;
         }
       },
       // Trackpad gestures on most platforms since flutter 3.3 use
       // these onPointerPanZoom* callbacks.
       // See https://docs.flutter.dev/release/breaking-changes/trackpad-gestures
-      onPointerPanZoomUpdate: _trackpadZoom?.submit,
+      onPointerPanZoomStart: _trackpadZoom?.start,
+      onPointerPanZoomUpdate: _trackpadZoom?.update,
+      onPointerPanZoomEnd: _trackpadZoom?.end,
 
       child: GestureDetector(
         onTapDown: _tap?.setDetails,
@@ -271,8 +274,11 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
 
     if (newFlags.trackpadZoom) {
       _trackpadZoom = TrackpadZoomGestureService(controller: _controller);
+      _trackpadLegacyZoom =
+          TrackpadLegacyZoomGestureService(controller: _controller);
     } else {
       _trackpadZoom = null;
+      _trackpadLegacyZoom = null;
     }
 
     if (newFlags.keyTriggerDragRotate) {
