@@ -40,8 +40,8 @@ class TrackpadZoomGestureService extends _BaseGestureService {
       math.Point<double> newCenterPt;
 
       final oldCenterPt = _camera.project(_camera.center, newZoom);
-      final newFocalLatLong = _camera.offsetToCrs(_startLocalFocal!, newZoom);
-      final newFocalPt = _camera.project(newFocalLatLong, newZoom);
+      final newFocalLatLng = _camera.offsetToCrs(_startLocalFocal!, newZoom);
+      final newFocalPt = _camera.project(newFocalLatLng, newZoom);
       final oldFocalPt = _camera.project(_startFocalLatLng!, newZoom);
       final zoomDifference = oldFocalPt - newFocalPt;
       final moveDifference =
