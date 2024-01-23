@@ -207,8 +207,9 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
         // pan and scale, scale is a superset of the pan gesture
         onScaleStart: useScaleCallback
             ? (details) {
-                if (_keyTriggerDragRotate?.keyPressed ?? false) {
-                  _keyTriggerDragRotate!.start();
+                if (_keyTriggerDragRotate?.consumeGesture ?? false) {
+                  final screenSize = MediaQuery.sizeOf(context);
+                  _keyTriggerDragRotate!.start(screenSize);
                 } else if (_doubleTapDragZoom?.isActive ?? false) {
                   _doubleTapDragZoom!.start(details);
                 } else if (details.pointerCount == 1) {
@@ -220,7 +221,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
             : null,
         onScaleUpdate: useScaleCallback
             ? (details) {
-                if (_keyTriggerDragRotate?.keyPressed ?? false) {
+                if (_keyTriggerDragRotate?.consumeGesture ?? false) {
                   _keyTriggerDragRotate!.update(details);
                 } else if (_doubleTapDragZoom?.isActive ?? false) {
                   _doubleTapDragZoom!.update(details);
@@ -233,7 +234,7 @@ class MapInteractiveViewerState extends State<MapInteractiveViewer>
             : null,
         onScaleEnd: useScaleCallback
             ? (details) {
-                if (_keyTriggerDragRotate?.keyPressed ?? false) {
+                if (_keyTriggerDragRotate?.consumeGesture ?? false) {
                   _keyTriggerDragRotate!.end();
                 } else if (_doubleTapDragZoom?.isActive ?? false) {
                   _doubleTapDragZoom!.isActive = false;
