@@ -7,7 +7,6 @@ import 'package:flutter_map_example/pages/custom_crs/custom_crs.dart';
 import 'package:flutter_map_example/pages/epsg3413_crs.dart';
 import 'package:flutter_map_example/pages/epsg4326_crs.dart';
 import 'package:flutter_map_example/pages/fallback_url_page.dart';
-import 'package:flutter_map_example/pages/home.dart';
 import 'package:flutter_map_example/pages/interactive_test_page.dart';
 import 'package:flutter_map_example/pages/latlng_to_screen_point.dart';
 import 'package:flutter_map_example/pages/many_circles.dart';
@@ -22,6 +21,7 @@ import 'package:flutter_map_example/pages/plugin_zoombuttons.dart';
 import 'package:flutter_map_example/pages/polygon.dart';
 import 'package:flutter_map_example/pages/polygon_perf_stress.dart';
 import 'package:flutter_map_example/pages/polyline.dart';
+import 'package:flutter_map_example/pages/polyline_geojson_page.dart';
 import 'package:flutter_map_example/pages/polyline_perf_stress.dart';
 import 'package:flutter_map_example/pages/reset_tile_layer.dart';
 import 'package:flutter_map_example/pages/retina.dart';
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF8dea88),
       ),
-      home: const HomePage(),
+      home: const PolylineGeoJsonPage(),
       routes: <String, WidgetBuilder>{
         CancellableTileProviderPage.route: (context) =>
             const CancellableTileProviderPage(),
