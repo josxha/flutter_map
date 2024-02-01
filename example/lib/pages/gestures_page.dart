@@ -106,12 +106,30 @@ class _GesturesPageState extends State<GesturesPage> {
             Expanded(
               child: FlutterMap(
                 options: MapOptions(
-                  onMapEvent: (evt) => setState(() => _latestEvent = evt),
+                  onMapEvent: (evt) {
+                    print('event: ${evt.runtimeType}');
+                    setState(() => _latestEvent = evt);
+                  },
                   initialCenter: const LatLng(51.5, -0.09),
                   initialZoom: 11,
                   interactionOptions: InteractionOptions(
                     gestures: MapGestures.bitfield(flags),
                   ),
+                  onTap: (details, point) => print('onTap'),
+                  onLongPress: (details, point) => print('onLongPress'),
+                  onSecondaryTap: (details, point) => print('onSecondaryTap'),
+                  onSecondaryLongPress: (details, point) =>
+                      print('onSecondaryLongPress'),
+                  onTertiaryTap: (details, point) => print('onTertiaryTap'),
+                  onTertiaryLongPress: (details, point) =>
+                      print('onTertiaryLongPress'),
+                  onMapReady: () => print('onMapReady'),
+                  onPointerCancel: (details, point) => print('onPointerCancel'),
+                  //onPointerDown: (details, point) => print('onPointerDown'),
+                  //onPointerHover: (details, point) => print('onPointerHover'),
+                  //onPointerUp: (details, point) => print('onPointerUp'),
+                  //onPositionChanged: (details, point) =>
+                  //    print('onPositionChanged'),
                 ),
                 children: [openStreetMapTileLayer],
               ),
