@@ -23,8 +23,17 @@ class _PolygonPainter extends CustomPainter {
     amountVertices = polygons.map((e) => e.points.length).sum;
   }
 
+  Vertices? _cache;
+
   @override
   void paint(Canvas canvas, Size size) {
+    final now = DateTime.timestamp();
+    if (_cache != null) {
+      // Having the vertices cached helps if the map rebuilds but the MapCamera
+      // stays the same. This happens e.g. when tiles load and get displayed.
+      canvas.drawVertices(_cache!, BlendMode.dst, _polygonPaint);
+      return;
+    }
     final zoomScale = camera.crs.scale(camera.zoom);
     final centerPointX =
         projectAndTransformLon(camera.center.longitude, zoomScale);
@@ -55,6 +64,7 @@ class _PolygonPainter extends CustomPainter {
     }
 
     final vertices = Vertices.raw(VertexMode.triangles, floatList);
+    _cache = vertices;
     canvas.drawVertices(vertices, BlendMode.dst, _polygonPaint);
   }
 
