@@ -11,43 +11,63 @@ class _PolygonPainter extends CustomPainter {
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
 
+  final Epsg3857 crs;
+  final SphericalMercator projection;
+  late final int amountVertices;
+
   _PolygonPainter({
     required this.polygons,
     required this.camera,
-  });
+  })  : crs = camera.crs as Epsg3857,
+        projection = camera.crs.projection as SphericalMercator {
+    amountVertices = polygons.map((e) => e.points.length).sum;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final origin = (camera.project(camera.center) - camera.size / 2).toOffset();
+    final zoomScale = camera.crs.scale(camera.zoom);
+    final centerPointX =
+        projectAndTransformLon(camera.center.longitude, zoomScale);
+    final centerPointY =
+        projectAndTransformLat(camera.center.latitude, zoomScale);
+    final originX = centerPointX - camera.size.x / 2;
+    final originY = centerPointY - camera.size.y / 2;
 
-    final amountVertices = polygons.map((e) => e.points.length).sum;
-
-    final floatList = Float32List(amountVertices * 2 * 5);
+    final floatList = Float32List(amountVertices * 2 * 5); //todo
     int f = 0;
     for (var i = 0; i < polygons.length; i++) {
       final points = polygons[i].points;
-      final xyBase = camera.crs.projection.projectXY(points.first);
-      final (xBase, yBase) = camera.crs
-          .transform(xyBase.$1, xyBase.$2, camera.crs.scale(camera.zoom));
+      final baseX = projectAndTransformLon(points.first.longitude, zoomScale);
+      final baseY = projectAndTransformLat(points.first.latitude, zoomScale);
       for (var j = 0; j < points.length - 1; j++) {
-        floatList[f++] = xBase - origin.dx;
-        floatList[f++] = yBase - origin.dy;
+        floatList[f++] = baseX - originX;
+        floatList[f++] = baseY - originY;
 
-        var xy = camera.crs.projection.projectXY(points[j]);
-        var (x, y) =
-            camera.crs.transform(xy.$1, xy.$2, camera.crs.scale(camera.zoom));
-        floatList[f++] = x - origin.dx;
-        floatList[f++] = y - origin.dy;
-        xy = camera.crs.projection.projectXY(points[j + 1]);
-        (x, y) =
-            camera.crs.transform(xy.$1, xy.$2, camera.crs.scale(camera.zoom));
-        floatList[f++] = x - origin.dx;
-        floatList[f++] = y - origin.dy;
+        var x = projectAndTransformLon(points[j].longitude, zoomScale);
+        var y = projectAndTransformLat(points[j].latitude, zoomScale);
+        floatList[f++] = x - originX;
+        floatList[f++] = y - originY;
+        x = projectAndTransformLon(points[j + 1].longitude, zoomScale);
+        y = projectAndTransformLat(points[j + 1].latitude, zoomScale);
+        floatList[f++] = x - originX;
+        floatList[f++] = y - originY;
       }
     }
 
     final vertices = Vertices.raw(VertexMode.triangles, floatList);
     canvas.drawVertices(vertices, BlendMode.dst, _polygonPaint);
+  }
+
+  double projectAndTransformLon(double lon, double zoomScale) {
+    return zoomScale *
+        (crs.transformation.a * SphericalMercator.projectLng(lon) +
+            crs.transformation.b);
+  }
+
+  double projectAndTransformLat(double lat, double zoomScale) {
+    return zoomScale *
+        (crs.transformation.c * SphericalMercator.projectLat(lat) +
+            crs.transformation.d);
   }
 
   @override

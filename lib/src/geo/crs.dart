@@ -38,6 +38,7 @@ abstract class Crs {
 
   /// Scale planar coordinate to scaled map point.
   (double, double) transform(double x, double y, double scale);
+
   (double, double) untransform(double x, double y, double scale);
 
   /// Converts a point on the sphere surface (with a certain zoom) to a
@@ -68,37 +69,37 @@ abstract class Crs {
 @internal
 abstract class CrsWithStaticTransformation extends Crs {
   @nonVirtual
-  @protected
-  final _Transformation _transformation;
+  final Transformation transformation;
 
   @override
   final Projection projection;
 
   const CrsWithStaticTransformation._({
-    required _Transformation transformation,
+    required Transformation transformation,
     required this.projection,
     required super.code,
     required super.infinite,
     super.wrapLng,
     super.wrapLat,
-  }) : _transformation = transformation;
+  }) : transformation = transformation;
 
   @override
   (double, double) transform(double x, double y, double scale) =>
-      _transformation.transform(x, y, scale);
+      transformation.transform(x, y, scale);
+
   @override
   (double, double) untransform(double x, double y, double scale) =>
-      _transformation.untransform(x, y, scale);
+      transformation.untransform(x, y, scale);
 
   @override
   (double, double) latLngToXY(LatLng latlng, double scale) {
     final (x, y) = projection.projectXY(latlng);
-    return _transformation.transform(x, y, scale);
+    return transformation.transform(x, y, scale);
   }
 
   @override
   LatLng pointToLatLng(Point point, double zoom) {
-    final (x, y) = _transformation.untransform(
+    final (x, y) = transformation.untransform(
       point.x.toDouble(),
       point.y.toDouble(),
       scale(zoom),
@@ -112,8 +113,8 @@ abstract class CrsWithStaticTransformation extends Crs {
 
     final b = projection.bounds!;
     final s = scale(zoom);
-    final (minx, miny) = _transformation.transform(b.min.x, b.min.y, s);
-    final (maxx, maxy) = _transformation.transform(b.max.x, b.max.y, s);
+    final (minx, miny) = transformation.transform(b.min.x, b.min.y, s);
+    final (maxx, maxy) = transformation.transform(b.max.x, b.max.y, s);
     return Bounds<double>(
       Point<double>(minx, miny),
       Point<double>(maxx, maxy),
@@ -127,7 +128,7 @@ class CrsSimple extends CrsWithStaticTransformation {
   const CrsSimple()
       : super._(
           code: 'CRS.SIMPLE',
-          transformation: const _Transformation(1, 0, -1, 0),
+          transformation: const Transformation(1, 0, -1, 0),
           projection: const _LonLat(),
           infinite: false,
           wrapLat: null,
@@ -144,7 +145,7 @@ class Epsg3857 extends CrsWithStaticTransformation {
   const Epsg3857()
       : super._(
           code: 'EPSG:3857',
-          transformation: const _Transformation(_scale, 0.5, -_scale, 0.5),
+          transformation: const Transformation(_scale, 0.5, -_scale, 0.5),
           projection: const SphericalMercator(),
           infinite: false,
           wrapLng: const (-180, 180),
@@ -152,7 +153,7 @@ class Epsg3857 extends CrsWithStaticTransformation {
 
   @override
   (double, double) latLngToXY(LatLng latlng, double scale) =>
-      _transformation.transform(
+      transformation.transform(
         SphericalMercator.projectLng(latlng.longitude),
         SphericalMercator.projectLat(latlng.latitude),
         scale,
@@ -160,7 +161,7 @@ class Epsg3857 extends CrsWithStaticTransformation {
 
   @override
   Point<double> latLngToPoint(LatLng latlng, double zoom) {
-    final (x, y) = _transformation.transform(
+    final (x, y) = transformation.transform(
       SphericalMercator.projectLng(latlng.longitude),
       SphericalMercator.projectLat(latlng.latitude),
       scale(zoom),
@@ -177,7 +178,7 @@ class Epsg4326 extends CrsWithStaticTransformation {
   const Epsg4326()
       : super._(
           projection: const _LonLat(),
-          transformation: const _Transformation(1 / 180, 1, -1 / 180, 0.5),
+          transformation: const Transformation(1 / 180, 1, -1 / 180, 0.5),
           code: 'EPSG:4326',
           infinite: false,
           wrapLng: const (-180, 180),
@@ -189,14 +190,14 @@ class Epsg4326 extends CrsWithStaticTransformation {
 class Proj4Crs extends Crs {
   @override
   final Projection projection;
-  final List<_Transformation> _transformations;
+  final List<Transformation> _transformations;
   final List<double> _scales;
 
   const Proj4Crs._({
     required super.code,
     required this.projection,
     required super.infinite,
-    required List<_Transformation> transformations,
+    required List<Transformation> transformations,
     required List<double> scales,
   })  : _transformations = transformations,
         _scales = scales,
@@ -225,16 +226,16 @@ class Proj4Crs extends Crs {
           'Please provide scales or resolutions to determine scales');
     }
 
-    List<_Transformation> transformations;
+    List<Transformation> transformations;
     if (null == origins || origins.isEmpty) {
-      transformations = [const _Transformation(1, 0, -1, 0)];
+      transformations = [const Transformation(1, 0, -1, 0)];
     } else {
       if (origins.length == 1) {
         final origin = origins[0];
-        transformations = [_Transformation(1, -origin.x, -1, origin.y)];
+        transformations = [Transformation(1, -origin.x, -1, origin.y)];
       } else {
         transformations =
-            origins.map((p) => _Transformation(1, -p.x, -1, p.y)).toList();
+            origins.map((p) => Transformation(1, -p.x, -1, p.y)).toList();
       }
     }
 
@@ -249,24 +250,25 @@ class Proj4Crs extends Crs {
 
   @override
   (double, double) transform(double x, double y, double scale) =>
-      _getTransformationByZoom(zoom(scale)).transform(x, y, scale);
+      getTransformationByZoom(zoom(scale)).transform(x, y, scale);
+
   @override
   (double, double) untransform(double x, double y, double scale) =>
-      _getTransformationByZoom(zoom(scale)).untransform(x, y, scale);
+      getTransformationByZoom(zoom(scale)).untransform(x, y, scale);
 
   /// Converts a point on the sphere surface (with a certain zoom) in a
   /// map point.
   @override
   (double, double) latLngToXY(LatLng latlng, double scale) {
     final (x, y) = projection.projectXY(latlng);
-    final transformation = _getTransformationByZoom(zoom(scale));
+    final transformation = getTransformationByZoom(zoom(scale));
     return transformation.transform(x, y, scale);
   }
 
   /// Converts a map point to the sphere coordinate (at a certain zoom).
   @override
   LatLng pointToLatLng(Point point, double zoom) {
-    final (x, y) = _getTransformationByZoom(zoom).untransform(
+    final (x, y) = getTransformationByZoom(zoom).untransform(
       point.x.toDouble(),
       point.y.toDouble(),
       scale(zoom),
@@ -282,7 +284,7 @@ class Proj4Crs extends Crs {
     final b = projection.bounds!;
     final zoomScale = scale(zoom);
 
-    final transformation = _getTransformationByZoom(zoom);
+    final transformation = getTransformationByZoom(zoom);
     final (minx, miny) = transformation.transform(b.min.x, b.min.y, zoomScale);
     final (maxx, maxy) = transformation.transform(b.max.x, b.max.y, zoomScale);
     return Bounds<double>(
@@ -342,7 +344,7 @@ class Proj4Crs extends Crs {
   }
 
   /// returns Transformation object based on zoom
-  _Transformation _getTransformationByZoom(double zoom) {
+  Transformation getTransformationByZoom(double zoom) {
     final iZoom = zoom.round();
     final lastIdx = _transformations.length - 1;
     return _transformations[iZoom > lastIdx ? lastIdx : iZoom];
@@ -474,13 +476,13 @@ class _Proj4Projection extends Projection {
 }
 
 @immutable
-class _Transformation {
+class Transformation {
   final double a;
   final double b;
   final double c;
   final double d;
 
-  const _Transformation(this.a, this.b, this.c, this.d);
+  const Transformation(this.a, this.b, this.c, this.d);
 
   @nonVirtual
   (double, double) transform(double x, double y, double scale) => (
