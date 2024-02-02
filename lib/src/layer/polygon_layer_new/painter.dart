@@ -39,7 +39,7 @@ class _PolygonPainter extends CustomPainter {
       final points = polygons[i].points;
       final baseX = projectAndTransformLon(points.first.longitude, zoomScale);
       final baseY = projectAndTransformLat(points.first.latitude, zoomScale);
-      for (var j = 0; j < points.length - 1; j++) {
+      for (var j = 1; j < points.length - 1; j++) {
         floatList[f++] = baseX - originX;
         floatList[f++] = baseY - originY;
 
