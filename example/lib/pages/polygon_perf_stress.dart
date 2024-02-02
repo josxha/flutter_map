@@ -5,7 +5,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_example/misc/tile_providers.dart';
 import 'package:flutter_map_example/widgets/drawer/menu_drawer.dart';
 import 'package:flutter_map_example/widgets/show_no_web_perf_overlay_snackbar.dart';
-import 'package:flutter_map_example/widgets/simplification_tolerance_slider.dart';
 import 'package:flutter_map_geojson/flutter_map_geojson.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -70,72 +69,11 @@ class _PolygonPerfStressPageState extends State<PolygonPerfStressPage> {
                     geoJsonParser.connectionState != ConnectionState.done ||
                             geoJsonParser.data == null
                         ? const SizedBox.shrink()
-                        : PolygonLayer(
+                        : PolygonLayer2(
                             polygons: geoJsonParser.data!.polygons,
-                            performantRendering: usePerformantDrawing,
-                            simplificationTolerance: simplificationTolerance,
                           ),
               ),
             ],
-          ),
-          Positioned(
-            left: 16,
-            top: 16,
-            right: 16,
-            child: Column(
-              children: [
-                SimplificationToleranceSlider(
-                  initialTolerance: _initialSimplificationTolerance,
-                  onChangedTolerance: (v) =>
-                      setState(() => simplificationTolerance = v),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _LabelledSwitch(
-                      tooltipMessage: 'Performant Drawing',
-                      icon: const Icon(Icons.speed_rounded),
-                      value: usePerformantDrawing,
-                      onChanged: (v) =>
-                          setState(() => usePerformantDrawing = v),
-                    ),
-                    const SizedBox(width: 12),
-                    _LabelledSwitch(
-                      tooltipMessage: 'Thick Outlines',
-                      icon: const Icon(Icons.line_weight_rounded),
-                      value: useThickOutlines,
-                      onChanged: (v) async {
-                        setState(() => useThickOutlines = v);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Row(
-                              children: [
-                                SizedBox.square(
-                                  dimension: 16,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                      valueColor:
-                                          AlwaysStoppedAnimation(Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Text('Loading GeoJson polygons...'),
-                              ],
-                            ),
-                          ),
-                        );
-                        await (geoJsonParser = loadPolygonsFromGeoJson());
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
           if (!kIsWeb)
             Positioned(

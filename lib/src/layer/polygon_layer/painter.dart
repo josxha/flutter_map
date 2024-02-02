@@ -42,6 +42,8 @@ class _PolygonPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    print(polygons.first.points.sublist(0, 3).join(', '));
+    print(triangles?.first?.sublist(0, 6).join(', '));
     final trianglePoints = <Offset>[];
 
     var filledPath = Path();
