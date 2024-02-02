@@ -20,30 +20,33 @@ class _PolygonPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final origin = (camera.project(camera.center) - camera.size / 2).toOffset();
 
-    final points2 = <Offset>[];
-    for (final polygon in polygons) {
-      final proj = polygon.points
-          .map((e) => camera.crs.projection.projectXY(e))
-          .map((e) => DoublePoint(e.$1, e.$2))
-          .toList(growable: false);
+    final amountVertices = polygons.map((e) => e.points.length).sum;
 
-      final fillOffsets = getOffsetsXY(
-        camera: camera,
-        origin: origin,
-        points: proj,
-      );
+    final floatList = Float32List(amountVertices * 2 * 5);
+    int f = 0;
+    for (var i = 0; i < polygons.length; i++) {
+      final points = polygons[i].points;
+      final xyBase = camera.crs.projection.projectXY(points.first);
+      final (xBase, yBase) = camera.crs
+          .transform(xyBase.$1, xyBase.$2, camera.crs.scale(camera.zoom));
+      for (var j = 0; j < points.length - 1; j++) {
+        floatList[f++] = xBase - origin.dx;
+        floatList[f++] = yBase - origin.dy;
 
-      final basePoint = fillOffsets.first;
-      for (var i = 1; i < proj.length - 1; i++) {
-        points2.addAll([
-          basePoint,
-          fillOffsets[i],
-          fillOffsets[i + 1],
-        ]);
+        var xy = camera.crs.projection.projectXY(points[j]);
+        var (x, y) =
+            camera.crs.transform(xy.$1, xy.$2, camera.crs.scale(camera.zoom));
+        floatList[f++] = x - origin.dx;
+        floatList[f++] = y - origin.dy;
+        xy = camera.crs.projection.projectXY(points[j + 1]);
+        (x, y) =
+            camera.crs.transform(xy.$1, xy.$2, camera.crs.scale(camera.zoom));
+        floatList[f++] = x - origin.dx;
+        floatList[f++] = y - origin.dy;
       }
     }
 
-    final vertices = Vertices(VertexMode.triangles, points2);
+    final vertices = Vertices.raw(VertexMode.triangles, floatList);
     canvas.drawVertices(vertices, BlendMode.dst, _polygonPaint);
   }
 

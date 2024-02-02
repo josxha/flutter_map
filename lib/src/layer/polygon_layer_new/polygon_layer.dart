@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/src/misc/simplify.dart';
