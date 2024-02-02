@@ -33,7 +33,7 @@ class _PolygonPainter extends CustomPainter {
     final originX = centerPointX - camera.size.x / 2;
     final originY = centerPointY - camera.size.y / 2;
 
-    final floatList = Float32List(amountVertices * 2 * 5); //todo
+    final floatList = Float32List(amountVertices * 6);
     int f = 0;
     for (var i = 0; i < polygons.length; i++) {
       final points = polygons[i].points;
