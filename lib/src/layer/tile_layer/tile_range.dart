@@ -102,9 +102,12 @@ class DiscreteTileRange extends TileRange {
   }
 
   /// Check if a [Point] is inside of the bounds of the [DiscreteTileRange].
-  bool contains(Point<int> point) {
-    return _bounds.contains(point);
-  }
+  bool contains(Point<int> point) => _bounds.contains(point);
+
+  /// Check if a [TileCoordinates] is inside of the bounds of the
+  /// [DiscreteTileRange].
+  bool containsTileCoordinates(TileCoordinates point) =>
+      _bounds.containsTileCoordinates(point);
 
   /// The minimum [Point] of the [DiscreteTileRange]
   Point<int> get min => _bounds.min;

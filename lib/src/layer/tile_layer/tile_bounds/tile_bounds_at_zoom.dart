@@ -117,7 +117,7 @@ class WrappedTileBoundsAtZoom extends TileBoundsAtZoom {
   }
 
   bool _wrappedBothContains(TileCoordinates coordinates) {
-    return tileRange.contains(TileCoordinates(
+    return tileRange.containsTileCoordinates(TileCoordinates(
       _wrapInt(coordinates.x, wrapX!),
       _wrapInt(coordinates.y, wrapY!),
       coordinates.z,
@@ -141,6 +141,6 @@ class WrappedTileBoundsAtZoom extends TileBoundsAtZoom {
   }
 
   @override
-  String toString() =>
-      'WrappedTileBoundsAtZoom($tileRange, $wrappedAxisIsAlwaysInBounds, $wrapX, $wrapY)';
+  String toString() => 'WrappedTileBoundsAtZoom('
+      '$tileRange, $wrappedAxisIsAlwaysInBounds, $wrapX, $wrapY)';
 }

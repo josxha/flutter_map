@@ -1,6 +1,7 @@
 import 'dart:math' as math hide Point;
 import 'dart:math' show Point;
 
+import 'package:flutter_map/flutter_map.dart';
 import 'package:meta/meta.dart';
 
 /// Rectangular bound delimited by orthogonal lines passing through two
@@ -90,6 +91,14 @@ class Bounds<T extends num> {
 
   /// Check if a [Point] is inside of the bounds.
   bool contains(Point<T> point) {
+    return (point.x >= min.x) &&
+        (point.x <= max.x) &&
+        (point.y >= min.y) &&
+        (point.y <= max.y);
+  }
+
+  /// Check if a [Point] is inside of the bounds.
+  bool containsTileCoordinates(TileCoordinates point) {
     return (point.x >= min.x) &&
         (point.x <= max.x) &&
         (point.y >= min.y) &&

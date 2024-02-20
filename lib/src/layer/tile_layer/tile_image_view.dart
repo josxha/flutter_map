@@ -19,12 +19,14 @@ final class TileImageView {
 
   List<TileImage> errorTilesOutsideOfKeepMargin() => _tileImages.values
       .where((tileImage) =>
-          tileImage.loadError && !_keepRange.contains(tileImage.coordinates))
+          tileImage.loadError &&
+          !_keepRange.containsTileCoordinates(tileImage.coordinates))
       .toList();
 
   List<TileImage> errorTilesNotVisible() => _tileImages.values
       .where((tileImage) =>
-          tileImage.loadError && !_visibleRange.contains(tileImage.coordinates))
+          tileImage.loadError &&
+          !_visibleRange.containsTileCoordinates(tileImage.coordinates))
       .toList();
 
   /// Get a list of [TileImage] that are stale and can get for pruned.
@@ -34,7 +36,7 @@ final class TileImageView {
 
     for (final tile in _tileImages.values) {
       final c = tile.coordinates;
-      if (!_keepRange.contains(c)) {
+      if (!_keepRange.containsTileCoordinates(c)) {
         stale.add(tile);
         continue;
       }
@@ -54,7 +56,7 @@ final class TileImageView {
 
     for (final tile in _tileImages.values) {
       final c = tile.coordinates;
-      if (!_visibleRange.contains(c)) {
+      if (!_visibleRange.containsTileCoordinates(c)) {
         continue;
       }
 
