@@ -55,11 +55,11 @@ class CursorKeyboardRotationOptions {
   final bool setNorthOnClick;
 
   /// Default trigger keys used in the default [isKeyTrigger]
-  static final defaultTriggerKeys = {
+  static const defaultTriggerKeys = [
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.controlLeft,
     LogicalKeyboardKey.controlRight,
-  };
+  ];
 
   /// Create options to configure cursor/keyboard rotation
   ///

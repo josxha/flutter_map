@@ -213,6 +213,17 @@ class _PolylinePainter<R extends Object> extends CustomPainter {
         }
         _paintLine(path, offsets);
       }
+
+      final textSpan = TextSpan(
+        text: polyline.label,
+        style: const TextStyle(color: Color(0xff000000)),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      textPainter.paint(canvas, offsets.first);
     }
 
     drawPaths();

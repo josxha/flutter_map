@@ -34,6 +34,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'Elizabeth Line',
         subtitle: 'Nothing really special here...',
       ),
+      label: 'label',
     ),
     Polyline(
       points: [
@@ -48,6 +49,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'Pink Line',
         subtitle: 'Fixed radius in meters instead of pixels',
       ),
+      label: 'label',
     ),
     Polyline(
       points: [
@@ -65,6 +67,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'Traffic Light Line',
         subtitle: 'Fancy gradient instead of a solid color',
       ),
+      label: 'label',
     ),
     Polyline(
       points: const [
@@ -80,6 +83,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'BlueRed Line',
         subtitle: 'Solid translucent color fill, with different color outline',
       ),
+      label: 'label',
     ),
     Polyline(
       points: const [
@@ -95,6 +99,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'BlackWhite Line',
         subtitle: 'Solid translucent color fill, with different color outline',
       ),
+      label: 'label',
     ),
     Polyline(
       points: const [
@@ -110,6 +115,7 @@ class _PolylinePageState extends State<PolylinePage> {
         title: 'YellowBlue Line',
         subtitle: 'Solid translucent color fill, with different color outline',
       ),
+      label: 'label',
     ),
   ];
   late final _polylines =

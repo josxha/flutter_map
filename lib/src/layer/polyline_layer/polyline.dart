@@ -36,6 +36,9 @@ class Polyline<R extends Object> {
   /// Should implement an equality operator to avoid breaking [Polyline.==].
   final R? hitValue;
 
+  /// An optional label that gets displayed next to the line stroke.
+  final String? label;
+
   /// Create a new [Polyline] used for the [PolylineLayer].
   Polyline({
     required this.points,
@@ -50,6 +53,7 @@ class Polyline<R extends Object> {
     this.strokeJoin = StrokeJoin.round,
     this.useStrokeWidthInMeter = false,
     this.hitValue,
+    this.label,
   });
 
   @override
