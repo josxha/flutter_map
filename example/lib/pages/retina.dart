@@ -39,10 +39,7 @@ class _RetinaPageState extends State<RetinaPage> {
         'accessToken': accessToken ?? '',
         'access_token': accessToken ?? '',
       },
-      retinaMode: switch (retinaMode) {
-        null => RetinaMode.isHighDensity(context),
-        _ => retinaMode!,
-      },
+      retinaMode: retinaMode ?? RetinaMode.isHighDensity(context),
       tileBuilder: (context, tileWidget, _) => DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(width: 2, color: Colors.white),

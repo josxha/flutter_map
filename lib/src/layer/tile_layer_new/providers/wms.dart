@@ -1,11 +1,6 @@
-part of 'tile_layer.dart';
+part of 'base.dart';
 
-/// Options for the []
-@immutable
-class WMSTileLayerOptions {
-  /// WMS service's URL, for example 'http://ows.mundialis.de/services/service?'
-  final String baseUrl;
-
+abstract class WmsTileProvider extends NetworkTileProvider {
   /// List of WMS layers to show
   final List<String> layers;
 
@@ -30,41 +25,45 @@ class WMSTileLayerOptions {
   /// Other request parameters
   final Map<String, String> otherParameters;
 
-  late final String _encodedBaseUrl;
+  late final Uri _encodedBaseUri;
 
-  late final double _versionNumber;
+  final double _versionNumber;
 
-  /// Create a new [WMSTileLayerOptions] instance.
-  WMSTileLayerOptions({
-    required this.baseUrl,
-    this.layers = const [],
-    this.styles = const [],
+  WmsTileProvider({
+    /// WMS service's URL, for example 'http://ows.mundialis.de/services/service?'
+    required String baseUrl,
+    this.layers = const <String>[],
+    this.styles = const <String>[],
     this.format = 'image/png',
     this.version = '1.1.1',
     this.transparent = true,
     this.uppercaseBoolValue = false,
     this.crs = const Epsg3857(),
-    this.otherParameters = const {},
-  }) {
-    _versionNumber = double.tryParse(version.split('.').take(2).join('.')) ?? 0;
-    _encodedBaseUrl = _buildEncodedBaseUrl();
+    this.otherParameters = const <String, String>{},
+    super.headers = const <String, String>{},
+  })  : _versionNumber =
+            double.tryParse(version.split('.').take(2).join('.')) ?? 0,
+        super(uriTemplate: baseUrl) {
+    _encodedBaseUri = _buildEncodedBaseUrl();
   }
 
-  String _buildEncodedBaseUrl() {
-    final projectionKey = _versionNumber >= 1.3 ? 'crs' : 'srs';
-    final buffer = StringBuffer(baseUrl)
-      ..write('&service=WMS')
-      ..write('&request=GetMap')
-      ..write('&layers=${layers.map(Uri.encodeComponent).join(',')}')
-      ..write('&styles=${styles.map(Uri.encodeComponent).join(',')}')
-      ..write('&format=${Uri.encodeComponent(format)}')
-      ..write('&$projectionKey=${Uri.encodeComponent(crs.code)}')
-      ..write('&version=${Uri.encodeComponent(version)}')
-      ..write(
-          '&transparent=${uppercaseBoolValue ? transparent.toString().toUpperCase() : transparent}');
-    otherParameters
-        .forEach((k, v) => buffer.write('&$k=${Uri.encodeComponent(v)}'));
-    return buffer.toString();
+  Uri _buildEncodedBaseUrl() {
+    final uri = Uri.parse(uriTemplate);
+    final queryParams = uri.queryParameters;
+    queryParams.addAll(<String, String>{
+      'service': 'WMS',
+      'request': 'GetMap',
+      'layers': layers.join(','),
+      'styles': styles.join(','),
+      'format': format,
+      _versionNumber >= 1.3 ? 'crs' : 'srs': crs.code,
+      'version': version,
+      'transparent': uppercaseBoolValue
+          ? transparent.toString().toUpperCase()
+          : transparent.toString(),
+    });
+    queryParams.addAll(otherParameters);
+    return uri.replace(queryParameters: queryParams);
   }
 
   /// Build the URL for a tile
@@ -75,12 +74,12 @@ class WMSTileLayerOptions {
     final seCoords = crs.pointToLatLng(sePoint, coords.z.toDouble());
     final nw = crs.projection.project(nwCoords);
     final se = crs.projection.project(seCoords);
-    final bounds = Bounds(nw, se);
+    final bounds = Bounds.unsafe(nw, se);
     final bbox = (_versionNumber >= 1.3 && crs is Epsg4326)
         ? [bounds.min.y, bounds.min.x, bounds.max.y, bounds.max.x]
         : [bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y];
 
-    final buffer = StringBuffer(_encodedBaseUrl);
+    final buffer = StringBuffer(_encodedBaseUri.toString());
     buffer.write('&width=${retinaMode ? tileSize * 2 : tileSize}');
     buffer.write('&height=${retinaMode ? tileSize * 2 : tileSize}');
     buffer.write('&bbox=${bbox.join(',')}');

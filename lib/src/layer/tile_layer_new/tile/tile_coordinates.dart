@@ -8,7 +8,8 @@ import 'package:meta/meta.dart';
 /// zoom level of 0 fits the complete world while bigger z values are using
 /// accordingly to the zoom level of the [MapCamera].
 ///
-/// For more information see the docs https://docs.fleaflet.dev/getting-started/explanation#slippy-map-convention.
+/// For more information see the docs
+/// https://docs.fleaflet.dev/getting-started/explanation#slippy-map-convention.
 ///
 /// The tile coordinates are based on maths' [Point] class but extended with
 /// the zoom level.
@@ -21,10 +22,10 @@ class TileCoordinates extends Point<int> {
   const TileCoordinates(super.x, super.y, this.z);
 
   @override
-  String toString() => 'TileCoordinate($x, $y, $z)';
+  String toString() => 'TileCoordinate(x: $x, y: $y, z: $z)';
 
-  // Overridden because Point's distanceTo does not allow comparing with a point
-  // of a different type.
+  /// Overridden because Point's distanceTo does not allow comparing with
+  /// a point of a different type.
   @override
   double distanceTo(Point<num> other) {
     final dx = x - other.x;
@@ -41,9 +42,7 @@ class TileCoordinates extends Point<int> {
         other.z == z;
   }
 
+  /// NOTE: the odd numbers are due to JavaScript's integer precision of 53 bits.
   @override
-  int get hashCode {
-    // NOTE: the odd numbers are due to JavaScript's integer precision of 53 bits.
-    return x ^ y << 24 ^ z << 48;
-  }
+  int get hashCode => x ^ y << 24 ^ z << 48;
 }

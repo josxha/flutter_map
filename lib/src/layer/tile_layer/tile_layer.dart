@@ -28,174 +28,16 @@ part 'wms_tile_layer_options.dart';
 /// avoid issues.
 @immutable
 class TileLayer extends StatefulWidget {
-  /// The URL template is a string that contains placeholders, which, when filled
-  /// in, create a URL/URI to a specific tile.
-  ///
-  /// For more information, see <https://docs.fleaflet.dev/layers/tile-layer>.
-  final String? urlTemplate;
-
-  /// Fallback URL template, used if an error occurs when fetching tiles from
-  /// the [urlTemplate].
-  ///
-  /// Note that specifying this (non-null) will result in tiles not being cached
-  /// in memory. This is to avoid issues where the [urlTemplate] is flaky, to
-  /// prevent different tilesets being displayed at the same time.
-  ///
-  /// It is expected that this follows the same retina support behaviour as
-  /// [urlTemplate].
-  ///
-  /// Avoid specifying this when using [AssetTileProvider] or [FileTileProvider],
-  /// as these providers are less performant and efficient when this is
-  /// specified. See their documentation for more information.
-  final String? fallbackUrl;
-
-  /// If `true`, inverses Y axis numbering for tiles (turn this on for
-  /// [TMS](https://en.wikipedia.org/wiki/Tile_Map_Service) services).
-  final bool tms;
-
-  /// If not `null`, then tiles will pull's WMS protocol requests
-  final WMSTileLayerOptions? wmsOptions;
-
-  /// Size for the tile.
-  /// Default is 256
-  late final double tileSize;
-
-  /// The minimum zoom level down to which this layer will be displayed
-  /// (inclusive)
-  ///
-  /// This should usually be 0 (as default).
-  late final double minZoom;
-
-  /// The maximum zoom level up to which this layer will be displayed
-  /// (inclusive).
-  ///
-  /// Prefer [maxNativeZoom] for setting the maximum zoom level supported by the
-  /// tile source. The main usage for this is to display a different [TileLayer]
-  /// when zoomed far in.
-  ///
-  /// Otherwise, this should usually be infinite (as default), so that there are
-  /// tiles always displayed.
-  late final double maxZoom;
-
-  /// Minimum zoom level supported by the tile source
-  ///
-  /// Tiles from below this zoom level will not be displayed, instead tiles at
-  /// this zoom level will be displayed and scaled.
-  ///
-  /// This should usually be 0 (as default), as most tile sources will support
-  /// zoom levels onwards from this.
-  late final int minNativeZoom;
-
-  /// Maximum zoom number supported by the tile source has available.
-  ///
-  /// Tiles from above this zoom level will not be displayed, instead tiles at
-  /// this zoom level will be displayed and scaled.
-  ///
-  /// Most tile servers support up to zoom level 19, which is the default.
-  /// Otherwise, this should be specified.
-  late final int maxNativeZoom;
-
-  /// If set to true, the zoom number used in tile URLs will be reversed
-  /// (`maxZoom - zoom` instead of `zoom`)
-  final bool zoomReverse;
-
-  /// The zoom number used in tile URLs will be offset with this value.
-  late final double zoomOffset;
-
-  /// List of subdomains for the URL.
-  ///
-  /// Example:
-  ///
-  /// Subdomains = {a,b,c}
-  ///
-  /// and the URL is as follows:
-  ///
-  /// https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
-  ///
-  /// then:
-  ///
-  /// https://a.tile.openstreetmap.org/{z}/{x}/{y}.png
-  /// https://b.tile.openstreetmap.org/{z}/{x}/{y}.png
-  /// https://c.tile.openstreetmap.org/{z}/{x}/{y}.png
-  final List<String> subdomains;
-
-  /// Control how tiles are displayed and whether they are faded in when loaded.
-  /// Defaults to TileDisplay.fadeIn().
-  final TileDisplay tileDisplay;
-
-  /// Provider with which to load map tiles
-  ///
-  /// The default is [NetworkTileProvider] which supports both IO and web
-  /// platforms, with basic session-only caching. It uses a [RetryClient] backed
-  /// by a standard [Client] to retry failed requests.
-  ///
-  /// `userAgentPackageName` is a [TileLayer] parameter, which should be passed
-  /// the application's correct package name, such as 'com.example.app'. See
-  /// https://docs.fleaflet.dev/layers/tile-layer#useragentpackagename for
-  /// more information.
-  ///
-  /// For information about other prebuilt tile providers, see
-  /// https://docs.fleaflet.dev/layers/tile-layer/tile-providers.
-  late final TileProvider tileProvider;
-
-  /// When panning the map, keep this many rows and columns of tiles before
-  /// unloading them.
-  final int keepBuffer;
-
-  /// When loading tiles only visible tiles are loaded by default. This option
-  /// increases the loaded tiles by the given number on both axis which can help
-  /// prevent the user from seeing loading tiles whilst panning. Setting the
-  /// pan buffer too high can impact performance, typically this is set to zero
-  /// or one.
-  final int panBuffer;
-
-  /// Tile image to show in place of the tile that failed to load.
-  final ImageProvider? errorImage;
-
-  /// Static information that should replace placeholders in the [urlTemplate].
-  /// Applying API keys is a good example on how to use this parameter.
-  ///
-  /// Example:
-  ///
-  /// ```dart
-  ///
-  /// TileLayerOptions(
-  ///     urlTemplate: "https://api.tiles.mapbox.com/v4/"
-  ///                  "{id}/{z}/{x}/{y}{r}.png?access_token={accessToken}",
-  ///     additionalOptions: {
-  ///         'accessToken': '<PUT_ACCESS_TOKEN_HERE>',
-  ///          'id': 'mapbox.streets',
-  ///     },
-  /// ),
-  /// ```
-  final Map<String, String> additionalOptions;
-
   /// Resolved retina mode, based on the `retinaMode` passed in the constructor
   /// and the [urlTemplate]
   ///
   /// See [RetinaMode] for more information.
   late final RetinaMode resolvedRetinaMode;
 
-  /// This callback will be executed if an error occurs when fetching tiles.
-  final ErrorTileCallBack? errorTileCallback;
-
-  /// Function which may Wrap Tile with custom Widget
-  /// There are predefined examples in 'tile_builder.dart'
-  final TileBuilder? tileBuilder;
-
   /// If a Tile was loaded with error and if strategy isn't `none` then TileProvider
   /// will be asked to evict Image based on current strategy
   /// (see #576 - even Error Images are cached in flutter)
   final EvictErrorTileStrategy evictErrorTileStrategy;
-
-  /// Stream to notify the [TileLayer] that it needs resetting
-  ///
-  /// The tile layer will not listen to this stream if it is not specified on
-  /// initial building, then later specified.
-  final Stream<void>? reset;
-
-  /// Only load tiles that are within these bounds
-  final LatLngBounds? tileBounds;
 
   /// This transformer modifies how/when tile updates and pruning are triggered
   /// based on [MapEvent]s. It is a StreamTransformer and therefore it is
@@ -211,34 +53,17 @@ class TileLayer extends StatefulWidget {
   /// Create a new [TileLayer] for the [FlutterMap] widget.
   TileLayer({
     super.key,
-    this.urlTemplate,
-    this.fallbackUrl,
     double tileSize = 256,
     double minZoom = 0,
     double maxZoom = double.infinity,
     int minNativeZoom = 0,
     int maxNativeZoom = 19,
-    this.zoomReverse = false,
-    double zoomOffset = 0.0,
-    this.additionalOptions = const {},
-    this.subdomains = const ['a', 'b', 'c'],
-    this.keepBuffer = 2,
-    this.panBuffer = 1,
-    this.errorImage,
-    final TileProvider? tileProvider,
-    this.tms = false,
-    this.wmsOptions,
-    this.tileDisplay = const TileDisplay.fadeIn(),
 
     /// See [RetinaMode] for more information
     ///
     /// Defaults to `false` when `null`.
     final bool? retinaMode,
-    this.errorTileCallback,
-    this.tileBuilder,
     this.evictErrorTileStrategy = EvictErrorTileStrategy.none,
-    this.reset,
-    this.tileBounds,
     TileUpdateTransformer? tileUpdateTransformer,
     String userAgentPackageName = 'unknown',
   })  : assert(
@@ -327,7 +152,6 @@ class TileLayer extends StatefulWidget {
 class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
   bool _initializedFromMapCamera = false;
 
-  final _tileImageManager = TileImageManager();
   late TileBounds _tileBounds;
   late var _tileRangeCalculator =
       TileRangeCalculator(tileSize: widget.tileSize);
@@ -464,10 +288,6 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final map = MapCamera.of(context);
-
-    if (_outsideZoomLimits(map.zoom.round())) return const SizedBox.shrink();
-
     final tileZoom = _clampToNativeZoom(map.zoom);
     final tileBoundsAtZoom = _tileBounds.atZoom(tileZoom);
     final visibleTileRange = _tileRangeCalculator.calculate(
@@ -494,46 +314,6 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
     );
 
     _tileScaleCalculator.clearCacheUnlessZoomMatches(map.zoom);
-
-    // Note: `renderTiles` filters out all tiles that are either off-screen or
-    // tiles at non-target zoom levels that are would be completely covered by
-    // tiles that are *ready* and at the target zoom level.
-    // We're happy to do a bit of diligent work here, since tiles not rendered are
-    // cycles saved later on in the render pipeline.
-    final tiles = _tileImageManager
-        .getTilesToRender(visibleRange: visibleTileRange)
-        .map((tileImage) => Tile(
-              // Must be an ObjectKey, not a ValueKey using the coordinates, in
-              // case we remove and replace the TileImage with a different one.
-              key: ObjectKey(tileImage),
-              scaledTileSize: _tileScaleCalculator.scaledTileSize(
-                map.zoom,
-                tileImage.coordinates.z,
-              ),
-              currentPixelOrigin: map.pixelOrigin,
-              tileImage: tileImage,
-              tileBuilder: widget.tileBuilder,
-            ))
-        .toList();
-
-    // Sort in render order. In reverse:
-    //   1. Tiles at the current zoom.
-    //   2. Tiles at the current zoom +/- 1.
-    //   3. Tiles at the current zoom +/- 2.
-    //   4. ...etc
-    int renderOrder(Tile a, Tile b) {
-      final (za, zb) = (a.tileImage.coordinates.z, b.tileImage.coordinates.z);
-      final cmp = (zb - tileZoom).abs().compareTo((za - tileZoom).abs());
-      if (cmp == 0) {
-        // When compare parent/child tiles of equal distance, prefer higher res images.
-        return za.compareTo(zb);
-      }
-      return cmp;
-    }
-
-    return MobileLayerTransformer(
-      child: Stack(children: tiles..sort(renderOrder)),
-    );
   }
 
   TileImage _createTileImage({
@@ -701,9 +481,6 @@ class _TileLayerState extends State<TileLayer> with TickerProviderStateMixin {
       evictStrategy: widget.evictErrorTileStrategy,
     );
   }
-
-  bool _outsideZoomLimits(num zoom) =>
-      zoom < widget.minZoom || zoom > widget.maxZoom;
 }
 
 double _distanceSq(TileCoordinates coord, Point<double> center) {

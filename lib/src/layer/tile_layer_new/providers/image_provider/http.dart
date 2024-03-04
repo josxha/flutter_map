@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart';
 
 /// Dedicated [ImageProvider] to fetch tiles from the network
@@ -12,19 +11,11 @@ import 'package:http/http.dart';
 /// Note that specifying a [fallbackUrl] will prevent this image provider from
 /// being cached.
 @immutable
-class MapNetworkImageProvider extends ImageProvider<MapNetworkImageProvider> {
+class HttpImageProvider extends ImageProvider<HttpImageProvider> {
   /// The URL to fetch the tile from (GET request)
-  final String url;
+  final Uri uri;
 
-  /// The URL to fetch the tile from (GET request), in the event the original
-  /// [url] request fails
-  ///
-  /// If this is non-null, [operator==] will always return `false` (except if
-  /// the two objects are [identical]). Therefore, if this is non-null, this
-  /// image provider will not be cached in memory.
-  final String? fallbackUrl;
-
-  /// The headers to include with the tile fetch request
+  /// The headers to include with the tile fetch request.
   ///
   /// Not included in [operator==].
   final Map<String, String> headers;
@@ -55,9 +46,8 @@ class MapNetworkImageProvider extends ImageProvider<MapNetworkImageProvider> {
   /// Supports falling back to a secondary URL, if the primary URL fetch fails.
   /// Note that specifying a [fallbackUrl] will prevent this image provider from
   /// being cached.
-  const MapNetworkImageProvider({
-    required this.url,
-    required this.fallbackUrl,
+  const HttpImageProvider({
+    required this.uri,
     required this.headers,
     required this.httpClient,
     required this.silenceExceptions,
@@ -67,48 +57,32 @@ class MapNetworkImageProvider extends ImageProvider<MapNetworkImageProvider> {
 
   @override
   ImageStreamCompleter loadImage(
-    MapNetworkImageProvider key,
+    HttpImageProvider key,
     ImageDecoderCallback decode,
   ) =>
       MultiFrameImageStreamCompleter(
         codec: _load(key, decode),
         scale: 1,
-        debugLabel: url,
+        debugLabel: uri.toString(),
         informationCollector: () => [
-          DiagnosticsProperty('URL', url),
-          DiagnosticsProperty('Fallback URL', fallbackUrl),
+          DiagnosticsProperty('URL', uri),
           DiagnosticsProperty('Current provider', key),
         ],
       );
 
   Future<Codec> _load(
-    MapNetworkImageProvider key,
-    ImageDecoderCallback decode, {
-    bool useFallback = false,
-  }) {
+    HttpImageProvider key,
+    ImageDecoderCallback decode,
+  ) async {
     startedLoading();
-
-    return httpClient
-        .readBytes(
-          Uri.parse(useFallback ? fallbackUrl ?? '' : url),
-          headers: headers,
-        )
-        .whenComplete(finishedLoadingBytes)
-        .then(ImmutableBuffer.fromUint8List)
-        .then(decode)
-        .onError<Exception>((err, stack) {
-      scheduleMicrotask(() => PaintingBinding.instance.imageCache.evict(key));
-      if (useFallback || fallbackUrl == null) {
-        if (!silenceExceptions) throw err;
-        return ImmutableBuffer.fromUint8List(TileProvider.transparentImage)
-            .then(decode);
-      }
-      return _load(key, decode, useFallback: true);
-    });
+    final bytes = await httpClient.readBytes(uri, headers: headers);
+    finishedLoadingBytes();
+    final buffer = await ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
-  SynchronousFuture<MapNetworkImageProvider> obtainKey(
+  SynchronousFuture<HttpImageProvider> obtainKey(
     ImageConfiguration configuration,
   ) =>
       SynchronousFuture(this);
@@ -116,11 +90,8 @@ class MapNetworkImageProvider extends ImageProvider<MapNetworkImageProvider> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MapNetworkImageProvider &&
-          fallbackUrl == null &&
-          url == other.url);
+      (other is HttpImageProvider && uri == other.uri);
 
   @override
-  int get hashCode =>
-      Object.hashAll([url, if (fallbackUrl != null) fallbackUrl]);
+  int get hashCode => uri.hashCode;
 }

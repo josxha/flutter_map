@@ -14,23 +14,12 @@ typedef TileCreator = TileImage Function(TileCoordinates coordinates);
 /// The [TileImageManager] orchestrates the loading and pruning of tiles.
 @immutable
 class TileImageManager {
-  final Map<TileCoordinates, TileImage> _tiles =
-      HashMap<TileCoordinates, TileImage>();
-
-  /// Check if the [TileImageManager] has the tile for a given tile cooridantes.
-  bool containsTileAt(TileCoordinates coordinates) =>
-      _tiles.containsKey(coordinates);
-
-  /// Check if all tile images are loaded
-  bool get allLoaded =>
-      _tiles.values.none((tile) => tile.loadFinishedAt == null);
-
   /// Filter tiles to only tiles that would be visible on screen. Specifically:
   ///   1. Tiles in the visible range at the target zoom level.
   ///   2. Tiles at non-target zoom level that would cover up holes that would
   ///      be left by tiles in #1, which are not ready yet.
   Iterable<TileImage> getTilesToRender({
-    required DiscreteTileRange visibleRange,
+    required ,
   }) =>
       TileImageView(
         tileImages: _tiles,
@@ -40,10 +29,7 @@ class TileImageManager {
         keepRange: visibleRange,
       ).renderTiles;
 
-  /// Check if all loaded tiles are within the [minZoom] and [maxZoom] level.
-  bool allWithinZoom(double minZoom, double maxZoom) => _tiles.values
-      .map((e) => e.coordinates)
-      .every((coord) => coord.z > maxZoom || coord.z < minZoom);
+
 
   /// Creates missing [TileImage]s within the provided tile range. Returns a
   /// list of [TileImage]s which haven't started loading yet.

@@ -1,7 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/widgets.dart';
-import 'package:flutter_map/flutter_map.dart';
+part of 'base.dart';
 
 /// Fetch tiles from the local filesystem (not asset store), where the tile URL
 /// is a path within the filesystem.
@@ -12,7 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 /// synchronously checked for existence - this blocks the main thread, and as
 /// such, specifying [TileLayer.fallbackUrl] should be avoided when using this
 /// provider.
-class FileTileProvider extends TileProvider {
+class FileTileProvider extends UriTileProvider {
   /// Fetch tiles from the local filesystem (not asset store), where the tile URL
   /// is a path within the filesystem.
   ///
@@ -22,14 +19,15 @@ class FileTileProvider extends TileProvider {
   /// synchronously checked for existence - this blocks the main thread, and as
   /// such, specifying [TileLayer.fallbackUrl] should be avoided when using this
   /// provider.
-  FileTileProvider();
+  const FileTileProvider({required super.uriTemplate});
 
   @override
-  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) {
-    final file = File(getTileUrl(coordinates, options));
-    final fallbackUrl = getTileFallbackUrl(coordinates, options);
-
-    if (fallbackUrl == null || file.existsSync()) return FileImage(file);
-    return FileImage(File(fallbackUrl));
+  ImageProvider getImage(
+    TileCoordinates coordinates,
+    TileLayer layer,
+    Future<void> cancelLoading,
+  ) {
+    final path = populateUriTemplate(coordinates, layer);
+    return FileImage(File(path));
   }
 }

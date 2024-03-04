@@ -1,5 +1,3 @@
-part of 'tile_layer.dart';
-
 /// Retina mode improves the resolution of map tiles, particularly on high
 /// density displays
 ///
@@ -40,30 +38,18 @@ enum RetinaMode {
   ///
   /// This should not be referred to by users, but is open for internal and
   /// plugin use by [TileLayer.resolvedRetinaMode].
-  disabled('Disabled'),
+  disabled,
 
   /// Resolved to use the '{r}' placeholder to request native retina tiles from
   /// the server
   ///
   /// This should not be referred to by users, but is open for internal and
   /// plugin use by [TileLayer.resolvedRetinaMode].
-  server('Server'),
+  server,
 
   /// Resolved to simulate retina mode
   ///
   /// This should not be referred to by users, but is open for internal and
   /// plugin use by [TileLayer.resolvedRetinaMode].
-  simulation('Simulation');
-
-  /// The readable name of the [RetinaMode]
-  final String friendlyName;
-
-  const RetinaMode(this.friendlyName);
-
-  /// Recommended switching method to assign to [TileLayer]`.retinaMode`
-  ///
-  /// Returns `true` when the [MediaQuery] of [context] returns an indication
-  /// of a high density display.
-  static bool isHighDensity(BuildContext context) =>
-      MediaQuery.of(context).devicePixelRatio > 1.0;
+  simulation;
 }
