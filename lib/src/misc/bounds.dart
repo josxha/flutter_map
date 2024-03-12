@@ -7,38 +7,55 @@ import 'package:meta/meta.dart';
 /// points.
 @immutable
 class Bounds<T extends num> {
-  /// The edge of the bounds with the minimum x and y coordinate
-  final Point<T> min;
+  /// The minimum x coordinate.
+  final T minX;
 
-  /// The edge of the bounds with the maximum x and y coordinate
-  final Point<T> max;
+  /// The maximum x coordinate.
+  final T maxX;
+
+  /// The minimum y coordinate.
+  final T minY;
+
+  /// The maximum y coordinate.
+  final T maxY;
 
   /// Create a [Bounds] instance in a safe way.
-  factory Bounds(Point<T> a, Point<T> b) {
+  factory Bounds(Point<T> corner1, Point<T> corner2) {
     final T minX;
     final T maxX;
-    if (a.x > b.x) {
-      minX = b.x;
-      maxX = a.x;
+    if (corner1.x > corner2.x) {
+      minX = corner2.x;
+      maxX = corner1.x;
     } else {
-      minX = a.x;
-      maxX = b.x;
+      minX = corner1.x;
+      maxX = corner2.x;
     }
     final T minY;
     final T maxY;
-    if (a.y > b.y) {
-      minY = b.y;
-      maxY = a.y;
+    if (corner1.y > corner2.y) {
+      minY = corner2.y;
+      maxY = corner1.y;
     } else {
-      minY = a.y;
-      maxY = b.y;
+      minY = corner1.y;
+      maxY = corner2.y;
     }
-    return Bounds.unsafe(Point<T>(minX, minY), Point<T>(maxX, maxY));
+    return Bounds.unsafe(minX: minX, maxX: maxX, maxY: maxY, minY: minY);
   }
 
-  /// Create a [Bounds] instance **without** checking if [min] is actually the
-  /// minimum and [max] is actually the maximum.
-  const Bounds.unsafe(this.min, this.max);
+  /// Create a [Bounds] instance from raw values.
+  const Bounds.unsafe({
+    required this.minX,
+    required this.maxX,
+    required this.minY,
+    required this.maxY,
+  })  : assert(
+          maxY >= minY,
+          "The maxY coordinate can't be smaller than the minY coordinate",
+        ),
+        assert(
+          maxX >= minX,
+          "The maxX coordinate can't be smaller than the minX coordinate",
+        );
 
   /// Create a [Bounds] as bounding box of a list of points.
   static Bounds<double> containing(Iterable<Point<double>> points) {
@@ -54,89 +71,85 @@ class Bounds<T extends num> {
       minY = math.min(point.y, minY);
     }
 
-    return Bounds.unsafe(Point(minX, minY), Point(maxX, maxY));
+    return Bounds.unsafe(minX: minX, minY: minY, maxX: maxX, maxY: maxY);
   }
 
   /// Creates a new [Bounds] obtained by expanding the current ones with a new
   /// point.
-  Bounds<T> extend(Point<T> point) {
-    return Bounds.unsafe(
-      Point(math.min(point.x, min.x), math.min(point.y, min.y)),
-      Point(math.max(point.x, max.x), math.max(point.y, max.y)),
-    );
-  }
-
-  /// This [Bounds] central point.
-  Point<double> get center => Point<double>(
-        (min.x + max.x) / 2,
-        (min.y + max.y) / 2,
+  Bounds<T> extend(Point<T> point) => Bounds.unsafe(
+        minX: math.min(point.x, minX),
+        minY: math.min(point.y, minY),
+        maxX: math.max(point.x, maxX),
+        maxY: math.max(point.y, maxY),
       );
 
+  /// This [Bounds] central point.
+  Point<double> get center =>
+      Point<double>((minX + maxX) / 2, (minY + maxY) / 2);
+
   /// Bottom-Left corner's point.
-  Point<T> get bottomLeft => Point(min.x, max.y);
+  Point<T> get bottomLeft => Point<T>(minX, maxY);
 
   /// Top-Right corner's point.
-  Point<T> get topRight => Point(max.x, min.y);
+  Point<T> get topRight => Point<T>(maxX, minY);
 
   /// Top-Left corner's point.
-  Point<T> get topLeft => min;
+  Point<T> get topLeft => Point<T>(minX, minY);
 
   /// Bottom-Right corner's point.
-  Point<T> get bottomRight => max;
+  Point<T> get bottomRight => Point<T>(maxX, maxY);
 
   /// A point that contains the difference between the point's axis projections.
-  Point<T> get size {
-    return max - min;
-  }
+  Point<T> get size => Point<T>((maxX - minX) as T, (maxY - minY) as T);
 
   /// Check if a [Point] is inside of the bounds.
   bool contains(Point<T> point) {
-    return (point.x >= min.x) &&
-        (point.x <= max.x) &&
-        (point.y >= min.y) &&
-        (point.y <= max.y);
+    return (point.x >= minX) &&
+        (point.x <= maxX) &&
+        (point.y >= minY) &&
+        (point.y <= maxY);
   }
 
   /// Check if an other [Bounds] object is inside of the bounds.
   bool containsBounds(Bounds<T> b) {
-    return (b.min.x >= min.x) &&
-        (b.max.x <= max.x) &&
-        (b.min.y >= min.y) &&
-        (b.max.y <= max.y);
+    return (b.minX >= minX) &&
+        (b.maxX <= maxX) &&
+        (b.minY >= minY) &&
+        (b.maxY <= maxY);
   }
 
   /// Checks if a part of the other [Bounds] is contained in this [Bounds].
   bool containsPartialBounds(Bounds<T> b) {
-    return (b.min.x <= max.x) &&
-        (b.max.x >= min.x) &&
-        (b.min.y <= max.y) &&
-        (b.max.y >= min.y);
+    return (b.minX <= maxX) &&
+        (b.maxX >= minX) &&
+        (b.minY <= maxY) &&
+        (b.maxY >= minY);
   }
 
   /// Checks if the line between the two coordinates is contained within the
   /// [Bounds].
   bool aabbContainsLine(double x1, double y1, double x2, double y2) {
     // Completely outside.
-    if ((x1 <= min.x && x2 <= min.x) ||
-        (y1 <= min.y && y2 <= min.y) ||
-        (x1 >= max.x && x2 >= max.x) ||
-        (y1 >= max.y && y2 >= max.y)) {
+    if ((x1 <= minX && x2 <= minX) ||
+        (y1 <= minY && y2 <= minY) ||
+        (x1 >= maxX && x2 >= maxX) ||
+        (y1 >= maxY && y2 >= maxY)) {
       return false;
     }
 
     final m = (y2 - y1) / (x2 - x1);
 
-    double y = m * (min.x - x1) + y1;
-    if (y > min.y && y < max.y) return true;
+    double y = m * (minX - x1) + y1;
+    if (y > minY && y < maxY) return true;
 
-    y = m * (max.x - x1) + y1;
-    if (y > min.y && y < max.y) return true;
+    y = m * (maxX - x1) + y1;
+    if (y > minY && y < maxY) return true;
 
-    double x = (min.y - y1) / m + x1;
-    if (x > min.x && x < max.x) return true;
+    double x = (minY - y1) / m + x1;
+    if (x > minX && x < maxX) return true;
 
-    x = (max.y - y1) / m + x1;
-    if (x > min.x && x < max.x) return true;
+    x = (maxY - y1) / m + x1;
+    if (x > minX && x < maxX) return true;
 
     return false;
   }
@@ -145,18 +158,19 @@ class Bounds<T extends num> {
   /// if there is no intersection. The returned bounds may be zero size
   /// (bottomLeft == topRight).
   Bounds<T>? intersect(Bounds<T> b) {
-    final leftX = math.max(min.x, b.min.x);
-    final rightX = math.min(max.x, b.max.x);
-    final topY = math.max(min.y, b.min.y);
-    final bottomY = math.min(max.y, b.max.y);
+    final leftX = math.max(minX, b.minX);
+    final rightX = math.min(maxX, b.maxX);
+    final topY = math.max(minY, b.minY);
+    final bottomY = math.min(maxY, b.maxY);
 
     if (leftX <= rightX && topY <= bottomY) {
-      return Bounds.unsafe(Point(leftX, topY), Point(rightX, bottomY));
+      return Bounds.unsafe(minX: leftX, minY: topY, maxX: rightX, maxY: maxY);
     }
 
     return null;
   }
 
   @override
-  String toString() => 'Bounds($min, $max)';
+  String toString() =>
+      'Bounds(minX: $minX, minY: $minY, maxX: $maxX, maxY: $maxY)';
 }

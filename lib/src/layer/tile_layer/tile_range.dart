@@ -65,8 +65,8 @@ class DiscreteTileRange extends TileRange {
     return DiscreteTileRange(
       zoom,
       _bounds
-          .extend(Point<int>(_bounds.min.x - count, _bounds.min.y - count))
-          .extend(Point<int>(_bounds.max.x + count, _bounds.max.y + count)),
+          .extend(Point<int>(_bounds.minX - count, _bounds.minY - count))
+          .extend(Point<int>(_bounds.maxX + count, _bounds.maxY + count)),
     );
   }
 
@@ -82,7 +82,7 @@ class DiscreteTileRange extends TileRange {
 
   /// Inclusive
   TileRange intersectX(int minX, int maxX) {
-    if (_bounds.min.x > maxX || _bounds.max.x < minX) {
+    if (_bounds.minX > maxX || _bounds.maxX < minX) {
       return EmptyTileRange._(zoom);
     }
 
@@ -97,7 +97,7 @@ class DiscreteTileRange extends TileRange {
 
   /// Inclusive
   TileRange intersectY(int minY, int maxY) {
-    if (_bounds.min.y > maxY || _bounds.max.y < minY) {
+    if (_bounds.minY > maxY || _bounds.maxY < minY) {
       return EmptyTileRange._(zoom);
     }
 
@@ -127,8 +127,8 @@ class DiscreteTileRange extends TileRange {
   /// Get a list of [TileCoordinates] for the [DiscreteTileRange].
   @override
   Iterable<TileCoordinates> get coordinates sync* {
-    for (var j = _bounds.min.y; j <= _bounds.max.y; j++) {
-      for (var i = _bounds.min.x; i <= _bounds.max.x; i++) {
+    for (var j = _bounds.minY; j <= _bounds.maxY; j++) {
+      for (var i = _bounds.minX; i <= _bounds.maxX; i++) {
         yield TileCoordinates(i, j, zoom);
       }
     }

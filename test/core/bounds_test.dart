@@ -12,8 +12,8 @@ void main() {
         'if maximum argument point is positioned higher', () {
       final bounds = Bounds(const Point(1, 2), const Point(3, 4));
 
-      expect(bounds.min.x, equals(1.0));
-      expect(bounds.min.y, equals(2.0));
+      expect(bounds.minX, equals(1.0));
+      expect(bounds.minY, equals(2.0));
     });
 
     test(
@@ -21,8 +21,8 @@ void main() {
         'if maximum argument point is positioned lower', () {
       final bounds = Bounds(const Point(3, 4), const Point(1, 2));
 
-      expect(bounds.min.x, equals(1.0));
-      expect(bounds.min.y, equals(2.0));
+      expect(bounds.minX, equals(1.0));
+      expect(bounds.minY, equals(2.0));
     });
 
     test(
@@ -30,8 +30,8 @@ void main() {
         'if maximum argument point is positioned lower', () {
       final bounds = Bounds(const Point(1, 2), const Point(0.01, 0.02));
 
-      expect(bounds.max.x, equals(1.0));
-      expect(bounds.max.y, equals(2.0));
+      expect(bounds.maxX, equals(1.0));
+      expect(bounds.maxY, equals(2.0));
     });
 
     test(
@@ -39,8 +39,8 @@ void main() {
         'if maximum argument point is positioned higher', () {
       final bounds = Bounds(const Point(0.01, 0.02), const Point(1, 2));
 
-      expect(bounds.max.x, equals(1.0));
-      expect(bounds.max.y, equals(2.0));
+      expect(bounds.maxX, equals(1.0));
+      expect(bounds.maxY, equals(2.0));
     });
 
     test('should get center of bounds as a point with x position', () {
@@ -176,7 +176,7 @@ void main() {
             Bounds(Point(-10.1, randomDouble()), Point(11.1, randomDouble()));
         final extendedBounds = bounds.extend(Point(-13.3, randomDouble()));
 
-        expect(extendedBounds.min.x, -13.3);
+        expect(extendedBounds.minX, -13.3);
       });
 
       test('should create new bounds with updated minimum y position', () {
@@ -184,7 +184,7 @@ void main() {
             Bounds(Point(randomDouble(), 3.5), Point(randomDouble(), 101.3));
         final extendedBounds = bounds.extend(Point(randomDouble(), 2.1));
 
-        expect(extendedBounds.min.y, equals(2.1));
+        expect(extendedBounds.minY, equals(2.1));
       });
 
       test('should create new bounds with updated maximum x position', () {
@@ -192,7 +192,7 @@ void main() {
             Bounds(Point(4.5, randomDouble()), Point(16.3, randomDouble()));
         final extendedBounds = bounds.extend(Point(18.9, randomDouble()));
 
-        expect(extendedBounds.max.x, equals(18.9));
+        expect(extendedBounds.maxX, equals(18.9));
       });
 
       test('should create new bounds with updated maximum y position', () {
@@ -200,7 +200,7 @@ void main() {
             Bounds(Point(randomDouble(), 3.5), Point(randomDouble(), 34.3));
         final extendedBounds = bounds.extend(Point(randomDouble(), 38.3));
 
-        expect(extendedBounds.max.y, equals(38.3));
+        expect(extendedBounds.maxY, equals(38.3));
       });
 
       test('should create new bounds and keep existing minimum x position', () {
@@ -208,7 +208,7 @@ void main() {
             Bounds(Point(-10.1, randomDouble()), Point(11.1, randomDouble()));
         final extendedBounds = bounds.extend(Point(-7.7, randomDouble()));
 
-        expect(extendedBounds.min.x, equals(bounds.min.x));
+        expect(extendedBounds.minX, equals(bounds.minX));
       });
 
       test('should create new bounds and keep existing minimum y position', () {
@@ -216,7 +216,7 @@ void main() {
             Bounds(Point(randomDouble(), 3.3), Point(randomDouble(), 12.7));
         final extendedBounds = bounds.extend(Point(randomDouble(), 4.4));
 
-        expect(extendedBounds.min.y, equals(bounds.min.y));
+        expect(extendedBounds.minY, equals(bounds.minY));
       });
 
       test('should create new bounds and keep existing maximum x position', () {
@@ -224,7 +224,7 @@ void main() {
             Bounds(Point(-15.5, randomDouble()), Point(25.8, randomDouble()));
         final extendedBounds = bounds.extend(Point(25.7, randomDouble()));
 
-        expect(extendedBounds.max.x, equals(bounds.max.x));
+        expect(extendedBounds.maxX, equals(bounds.maxX));
       });
 
       test('should create new bounds and keep existing maximum y position', () {
@@ -232,7 +232,7 @@ void main() {
             Bounds(Point(randomDouble(), 0), Point(randomDouble(), 15.5));
         final extendedBounds = bounds.extend(Point(randomDouble(), 15.4));
 
-        expect(extendedBounds.max.y, equals(bounds.max.y));
+        expect(extendedBounds.maxY, equals(bounds.maxY));
       });
     });
 

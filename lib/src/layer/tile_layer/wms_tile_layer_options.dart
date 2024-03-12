@@ -77,8 +77,8 @@ class WMSTileLayerOptions {
     final se = crs.projection.project(seCoords);
     final bounds = Bounds(nw, se);
     final bbox = (_versionNumber >= 1.3 && crs is Epsg4326)
-        ? [bounds.min.y, bounds.min.x, bounds.max.y, bounds.max.x]
-        : [bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y];
+        ? [bounds.minY, bounds.minX, bounds.maxY, bounds.maxX]
+        : [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY];
 
     final buffer = StringBuffer(_encodedBaseUrl);
     buffer.write('&width=${retinaMode ? tileSize * 2 : tileSize}');
